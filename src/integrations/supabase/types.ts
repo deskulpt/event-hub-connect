@@ -14,6 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          deposit_cents: number
+          event_date: string | null
+          event_id: string | null
+          host_id: string
+          id: string
+          inquiry_id: string | null
+          notes: string | null
+          provider_id: string
+          provider_kind: Database["public"]["Enums"]["recipient_kind"]
+          status: Database["public"]["Enums"]["booking_status"]
+          title: string
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deposit_cents?: number
+          event_date?: string | null
+          event_id?: string | null
+          host_id: string
+          id?: string
+          inquiry_id?: string | null
+          notes?: string | null
+          provider_id: string
+          provider_kind: Database["public"]["Enums"]["recipient_kind"]
+          status?: Database["public"]["Enums"]["booking_status"]
+          title: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deposit_cents?: number
+          event_date?: string | null
+          event_id?: string | null
+          host_id?: string
+          id?: string
+          inquiry_id?: string | null
+          notes?: string | null
+          provider_id?: string
+          provider_kind?: Database["public"]["Enums"]["recipient_kind"]
+          status?: Database["public"]["Enums"]["booking_status"]
+          title?: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          owner_id: string
+          phone: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          owner_id: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           accessibility_notes: string | null
@@ -130,6 +235,38 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          inquiry_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          inquiry_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          inquiry_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active_role: Database["public"]["Enums"]["app_role"]
@@ -162,6 +299,60 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tasks: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          event_id: string | null
+          id: string
+          owner_id: string
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          event_id?: string | null
+          id?: string
+          owner_id: string
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          event_id?: string | null
+          id?: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -199,9 +390,17 @@ export type Database = {
     }
     Enums: {
       app_role: "host" | "pro" | "business" | "admin"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "refunded"
       event_status: "draft" | "planning" | "booked" | "completed" | "cancelled"
       inquiry_status: "new" | "sent" | "replied" | "declined" | "expired"
       recipient_kind: "venue" | "pro" | "business"
+      task_status: "todo" | "in_progress" | "done" | "blocked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -330,9 +529,18 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["host", "pro", "business", "admin"],
+      booking_status: [
+        "pending",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "refunded",
+      ],
       event_status: ["draft", "planning", "booked", "completed", "cancelled"],
       inquiry_status: ["new", "sent", "replied", "declined", "expired"],
       recipient_kind: ["venue", "pro", "business"],
+      task_status: ["todo", "in_progress", "done", "blocked"],
     },
   },
 } as const

@@ -1,23 +1,34 @@
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, CalendarCheck, Wallet, ShieldCheck, ArrowRight, Sparkles, FileText, TrendingUp } from "lucide-react";
-
-const kpis = [
-  { label: "New leads", value: "0", hint: "Unread or unresponded", icon: MessageSquare, to: "/app/crm/inquiries" },
-  { label: "Upcoming jobs", value: "0", hint: "Confirmed in next 30 days", icon: CalendarCheck, to: "/app/crm/bookings" },
-  { label: "This month's earnings", value: "$0", hint: "Confirmed revenue", icon: Wallet, to: "/app/finance/overview" },
-  { label: "Insurance status", value: "Missing", hint: "Add to unlock more leads", icon: ShieldCheck, to: "/app/trust/insurance" },
-];
+import { countNewLeadsForRecipient } from "@/services/inquiries";
+import { countUpcomingBookingsForProvider } from "@/services/bookings";
 
 export const ProHome = () => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(" ")[0] ?? "";
-  const hasLeads = false; // wire to real data later
+
+  const { data: newLeads = 0 } = useQuery({
+    queryKey: ["leads-new", user?.id], queryFn: () => countNewLeadsForRecipient(user!.id), enabled: !!user,
+  });
+  const { data: upcomingJobs = 0 } = useQuery({
+    queryKey: ["bookings-upcoming", user?.id], queryFn: () => countUpcomingBookingsForProvider(user!.id), enabled: !!user,
+  });
+
+  const kpis = [
+    { label: "New leads", value: newLeads.toString(), hint: "Unread or unresponded", icon: MessageSquare, to: "/app/crm/inquiries" },
+    { label: "Upcoming jobs", value: upcomingJobs.toString(), hint: "Confirmed in next 30 days", icon: CalendarCheck, to: "/app/crm/bookings" },
+    { label: "This month's earnings", value: "$0", hint: "Confirmed revenue", icon: Wallet, to: "/app/finance" },
+    { label: "Insurance status", value: "Missing", hint: "Add to unlock more leads", icon: ShieldCheck, to: "/app/trust/insurance" },
+  ];
+
+  const hasLeads = newLeads > 0;
 
   return (
     <PageLayout
