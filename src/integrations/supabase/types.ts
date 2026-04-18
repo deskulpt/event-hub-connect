@@ -65,6 +65,71 @@ export type Database = {
         }
         Relationships: []
       }
+      inquiries: {
+        Row: {
+          budget_max_cents: number | null
+          budget_min_cents: number | null
+          created_at: string
+          event_id: string | null
+          guest_count: number | null
+          id: string
+          message: string | null
+          recipient_id: string
+          recipient_kind: Database["public"]["Enums"]["recipient_kind"]
+          replied_at: string | null
+          reply_note: string | null
+          requested_date: string | null
+          sender_id: string
+          status: Database["public"]["Enums"]["inquiry_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          budget_max_cents?: number | null
+          budget_min_cents?: number | null
+          created_at?: string
+          event_id?: string | null
+          guest_count?: number | null
+          id?: string
+          message?: string | null
+          recipient_id: string
+          recipient_kind: Database["public"]["Enums"]["recipient_kind"]
+          replied_at?: string | null
+          reply_note?: string | null
+          requested_date?: string | null
+          sender_id: string
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          budget_max_cents?: number | null
+          budget_min_cents?: number | null
+          created_at?: string
+          event_id?: string | null
+          guest_count?: number | null
+          id?: string
+          message?: string | null
+          recipient_id?: string
+          recipient_kind?: Database["public"]["Enums"]["recipient_kind"]
+          replied_at?: string | null
+          reply_note?: string | null
+          requested_date?: string | null
+          sender_id?: string
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active_role: Database["public"]["Enums"]["app_role"]
@@ -135,6 +200,8 @@ export type Database = {
     Enums: {
       app_role: "host" | "pro" | "business" | "admin"
       event_status: "draft" | "planning" | "booked" | "completed" | "cancelled"
+      inquiry_status: "new" | "sent" | "replied" | "declined" | "expired"
+      recipient_kind: "venue" | "pro" | "business"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -264,6 +331,8 @@ export const Constants = {
     Enums: {
       app_role: ["host", "pro", "business", "admin"],
       event_status: ["draft", "planning", "booked", "completed", "cancelled"],
+      inquiry_status: ["new", "sent", "replied", "declined", "expired"],
+      recipient_kind: ["venue", "pro", "business"],
     },
   },
 } as const
