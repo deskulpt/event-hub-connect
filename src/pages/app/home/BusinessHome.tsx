@@ -1,22 +1,32 @@
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, FileText, Wallet, ShieldCheck, ArrowRight, Sparkles, TrendingUp, Users } from "lucide-react";
-
-const kpis = [
-  { label: "Occupancy", value: "0%", hint: "Confirmed vs capacity", icon: CalendarDays, to: "/app/calendar" },
-  { label: "Outstanding quotes", value: "0", hint: "Awaiting acceptance", icon: FileText, to: "/app/crm/pipeline" },
-  { label: "Payouts", value: "$0", hint: "Upcoming or pending", icon: Wallet, to: "/app/finance/payouts" },
-  { label: "Compliance", value: "Action needed", hint: "Verification & insurance", icon: ShieldCheck, to: "/app/trust" },
-];
+import { countNewLeadsForRecipient } from "@/services/inquiries";
+import { countUpcomingBookingsForProvider } from "@/services/bookings";
 
 export const BusinessHome = () => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(" ")[0] ?? "";
+
+  const { data: newLeads = 0 } = useQuery({
+    queryKey: ["leads-new", user?.id], queryFn: () => countNewLeadsForRecipient(user!.id), enabled: !!user,
+  });
+  const { data: upcomingJobs = 0 } = useQuery({
+    queryKey: ["bookings-upcoming", user?.id], queryFn: () => countUpcomingBookingsForProvider(user!.id), enabled: !!user,
+  });
+
+  const kpis = [
+    { label: "Open quotes", value: newLeads.toString(), hint: "Inquiries awaiting reply", icon: FileText, to: "/app/crm/inquiries" },
+    { label: "Upcoming bookings", value: upcomingJobs.toString(), hint: "Confirmed reservations", icon: CalendarDays, to: "/app/crm/bookings" },
+    { label: "Payouts", value: "$0", hint: "Upcoming or pending", icon: Wallet, to: "/app/finance/payouts" },
+    { label: "Compliance", value: "Action needed", hint: "Verification & insurance", icon: ShieldCheck, to: "/app/trust" },
+  ];
 
   return (
     <PageLayout
