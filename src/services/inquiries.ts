@@ -54,7 +54,7 @@ export const updateInquiryStatus = async (
   status: InquiryStatus,
   replyNote?: string,
 ): Promise<InquiryRecord> => {
-  const patch: Record<string, unknown> = { status };
+  const patch: { status: InquiryStatus; reply_note?: string; replied_at?: string } = { status };
   if (replyNote !== undefined) patch.reply_note = replyNote;
   if (status === "replied") patch.replied_at = new Date().toISOString();
   const { data, error } = await supabase.from("inquiries").update(patch).eq("id", id).select("*").single();
