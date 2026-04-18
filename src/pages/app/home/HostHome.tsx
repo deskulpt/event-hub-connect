@@ -91,7 +91,32 @@ export const HostHome = () => {
           <Button size="sm" variant="ghost" onClick={() => navigate("/app/events")}>View all<ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No events scheduled. Once you create one, it'll appear here with stage, city, headcount, and budget.</p>
+          {upcoming.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No events scheduled. Once you create one, it'll appear here with stage, city, headcount, and budget.</p>
+          ) : (
+            <div className="space-y-2">
+              {upcoming.slice(0, 5).map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => navigate(`/app/events/${e.id}`)}
+                  className="flex w-full items-center justify-between rounded-md border border-border/60 px-3 py-2 text-left transition-colors hover:bg-muted/50"
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{e.title}</span>
+                      <Badge variant="outline" className="capitalize text-[10px]">{e.status}</Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                      {e.event_date && <span className="inline-flex items-center gap-1"><CalendarDays className="h-3 w-3" />{format(parseISO(e.event_date), "MMM d")}</span>}
+                      {e.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{e.city}</span>}
+                      {e.guest_count != null && <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{e.guest_count}</span>}
+                    </div>
+                  </div>
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
