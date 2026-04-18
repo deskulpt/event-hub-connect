@@ -300,6 +300,30 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_listings: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          listing_kind: Database["public"]["Enums"]["recipient_kind"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          listing_kind: Database["public"]["Enums"]["recipient_kind"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          listing_kind?: Database["public"]["Enums"]["recipient_kind"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           booking_id: string | null
@@ -375,6 +399,99 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors: {
+        Row: {
+          base_price_cents: number | null
+          category: Database["public"]["Enums"]["vendor_category"]
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+          photo_url: string | null
+          published: boolean
+          updated_at: string
+          vibe_tags: string[] | null
+        }
+        Insert: {
+          base_price_cents?: number | null
+          category?: Database["public"]["Enums"]["vendor_category"]
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          photo_url?: string | null
+          published?: boolean
+          updated_at?: string
+          vibe_tags?: string[] | null
+        }
+        Update: {
+          base_price_cents?: number | null
+          category?: Database["public"]["Enums"]["vendor_category"]
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          photo_url?: string | null
+          published?: boolean
+          updated_at?: string
+          vibe_tags?: string[] | null
+        }
+        Relationships: []
+      }
+      venues: {
+        Row: {
+          base_price_cents: number | null
+          capacity_max: number | null
+          capacity_min: number | null
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+          photo_url: string | null
+          published: boolean
+          updated_at: string
+          vibe_tags: string[] | null
+        }
+        Insert: {
+          base_price_cents?: number | null
+          capacity_max?: number | null
+          capacity_min?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          photo_url?: string | null
+          published?: boolean
+          updated_at?: string
+          vibe_tags?: string[] | null
+        }
+        Update: {
+          base_price_cents?: number | null
+          capacity_max?: number | null
+          capacity_min?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          photo_url?: string | null
+          published?: boolean
+          updated_at?: string
+          vibe_tags?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -401,6 +518,15 @@ export type Database = {
       inquiry_status: "new" | "sent" | "replied" | "declined" | "expired"
       recipient_kind: "venue" | "pro" | "business"
       task_status: "todo" | "in_progress" | "done" | "blocked"
+      vendor_category:
+        | "chef"
+        | "dj"
+        | "photographer"
+        | "planner"
+        | "artist"
+        | "caterer"
+        | "florist"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -541,6 +667,16 @@ export const Constants = {
       inquiry_status: ["new", "sent", "replied", "declined", "expired"],
       recipient_kind: ["venue", "pro", "business"],
       task_status: ["todo", "in_progress", "done", "blocked"],
+      vendor_category: [
+        "chef",
+        "dj",
+        "photographer",
+        "planner",
+        "artist",
+        "caterer",
+        "florist",
+        "other",
+      ],
     },
   },
 } as const

@@ -23,8 +23,8 @@ const navByRole: Record<AppRole, NavItem[]> = {
   host: [
     { title: "Home", url: "/app", icon: Home, end: true },
     { title: "My Events", url: "/app/events", icon: CalendarDays },
-    { title: "Discover", url: "/app/marketplace/discover", icon: Store },
-    { title: "Shortlists", url: "/app/marketplace/saved", icon: Heart },
+    { title: "Discover", url: "/app/marketplace", icon: Store, end: true },
+    { title: "Shortlist", url: "/app/marketplace/saved", icon: Heart },
     { title: "Calendar", url: "/app/calendar", icon: Calendar },
     { title: "Budget & Finance", url: "/app/finance", icon: Wallet },
     { title: "Inbox", url: "/app/inbox", icon: Inbox },
