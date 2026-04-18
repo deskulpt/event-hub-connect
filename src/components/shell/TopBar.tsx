@@ -1,4 +1,4 @@
-import { Bell, Search, Sparkles, ChevronsUpDown, LogOut, User as UserIcon, Settings as SettingsIcon } from "lucide-react";
+import { Bell, Search, Sparkles, ChevronsUpDown, LogOut, User as UserIcon, Settings as SettingsIcon, Check, PartyPopper, Briefcase, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -12,16 +12,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useActiveRole } from "@/hooks/useActiveRole";
+
+const roleMeta: Record<AppRole, { label: string; icon: typeof PartyPopper }> = {
+  host: { label: "Host workspace", icon: PartyPopper },
+  pro: { label: "Pro workspace", icon: Briefcase },
+  business: { label: "Business workspace", icon: Building2 },
+  admin: { label: "Admin workspace", icon: ShieldIcon },
+};
+
+// fallback for admin icon import — reuse Sparkles
+const ShieldIcon = Sparkles;
 
 export const TopBar = () => {
   const { profile, signOut } = useAuth();
+  const { activeRole, roles, setActiveRole, hasMultipleRoles } = useActiveRole();
   const navigate = useNavigate();
   const [aiOpen, setAiOpen] = useState(false);
   const initials = (profile?.full_name || profile?.email || "U").slice(0, 2).toUpperCase();
+  const ActiveIcon = roleMeta[activeRole].icon;
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border/60 bg-background/80 px-3 backdrop-blur-md">
