@@ -39,7 +39,7 @@ export default function EventNew() {
           <EventBriefForm
             submitLabel="Save brief"
             submitting={mutation.isPending}
-            onSubmit={(v) => mutation.mutateAsync(v)}
+            onSubmit={async (v) => { await mutation.mutateAsync(v); }}
             onCancel={() => navigate("/app/events")}
           />
         </CardContent>

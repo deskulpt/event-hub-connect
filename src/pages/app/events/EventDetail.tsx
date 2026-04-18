@@ -88,7 +88,7 @@ export default function EventDetail() {
             initial={event}
             submitLabel="Save changes"
             submitting={updateMutation.isPending}
-            onSubmit={(v) => updateMutation.mutateAsync(v)}
+            onSubmit={async (v) => { await updateMutation.mutateAsync(v); }}
             onCancel={() => setEditing(false)}
           />
         </CardContent></Card>
