@@ -22,11 +22,8 @@ const roleMeta: Record<AppRole, { label: string; icon: typeof PartyPopper }> = {
   host: { label: "Host workspace", icon: PartyPopper },
   pro: { label: "Pro workspace", icon: Briefcase },
   business: { label: "Business workspace", icon: Building2 },
-  admin: { label: "Admin workspace", icon: ShieldIcon },
+  admin: { label: "Admin workspace", icon: Sparkles },
 };
-
-// fallback for admin icon import — reuse Sparkles
-const ShieldIcon = Sparkles;
 
 export const TopBar = () => {
   const { profile, signOut } = useAuth();
