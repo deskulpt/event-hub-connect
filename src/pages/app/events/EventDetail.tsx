@@ -16,6 +16,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EventBriefForm } from "@/components/events/EventBriefForm";
+import { SendInquiryDialog } from "@/components/crm/SendInquiryDialog";
 import { deleteEvent, getEvent, updateEvent } from "@/services/events";
 import type { EventBriefInput, EventStatus } from "@/types/event";
 
@@ -107,6 +108,7 @@ export default function EventDetail() {
         primaryCta={<Button size="sm"><Sparkles className="mr-1 h-4 w-4" /> Generate plan</Button>}
         secondaryCta={
           <>
+            <SendInquiryDialog eventId={event.id} defaultSubject={event.title} triggerLabel="Send inquiry" />
             <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
               <Pencil className="mr-1 h-4 w-4" /> Edit brief
             </Button>

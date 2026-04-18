@@ -9,13 +9,19 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDays, MessageSquare, Wallet, Clock, Sparkles, ArrowRight, Heart, Store, MapPin, Users } from "lucide-react";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import { listEvents } from "@/services/events";
+import { countPendingRepliesForSender } from "@/services/inquiries";
 
 export const HostHome = () => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(" ")[0] ?? "";
 
   const { data: events = [] } = useQuery({ queryKey: ["events"], queryFn: listEvents });
+  const { data: pendingReplies = 0 } = useQuery({
+    queryKey: ["inquiries-pending", user?.id],
+    queryFn: () => countPendingRepliesForSender(user!.id),
+    enabled: !!user,
+  });
 
   const activeEvents = events.filter((e) => ["draft", "planning", "booked"].includes(e.status));
   const upcoming = events
@@ -29,7 +35,7 @@ export const HostHome = () => {
 
   const kpis = [
     { label: "Active events", value: activeEvents.length.toString(), hint: "In planning or booked", icon: CalendarDays, to: "/app/events" },
-    { label: "Pending replies", value: "0", hint: "Awaiting vendor response", icon: MessageSquare, to: "/app/crm/inquiries" },
+    { label: "Pending replies", value: pendingReplies.toString(), hint: "Awaiting vendor response", icon: MessageSquare, to: "/app/crm/inquiries" },
     { label: "Budget status", value: budgetLabel, hint: "Across active events", icon: Wallet, to: "/app/finance" },
     { label: "Next event", value: daysToNext != null ? `${daysToNext}d` : "—", hint: next?.title ?? "Days until nearest", icon: Clock, to: "/app/events" },
   ];
