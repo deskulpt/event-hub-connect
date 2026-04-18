@@ -1,6 +1,6 @@
 import {
   Home, CalendarDays, Store, Users, Calendar, Wallet, ShieldCheck, Inbox, BarChart3, Settings,
-  Heart, Bookmark, MessageSquare, ClipboardList, Briefcase, Sparkles,
+  Heart, Bookmark, MessageSquare, ClipboardList, Sparkles,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
