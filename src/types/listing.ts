@@ -12,7 +12,8 @@ export const VENDOR_CATEGORIES = [
 ] as const;
 export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 
-export type ListingKind = "venue" | "vendor";
+// Maps to DB enum recipient_kind: venue | pro | business
+export type ListingKind = "venue" | "pro";
 
 export interface VenueRecord {
   id: string;
