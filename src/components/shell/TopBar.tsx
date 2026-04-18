@@ -39,9 +39,37 @@ export const TopBar = () => {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border/60 bg-background/80 px-3 backdrop-blur-md">
       <SidebarTrigger />
-      <Button variant="ghost" size="sm" className="hidden gap-1 text-xs md:inline-flex">
-        Personal workspace <ChevronsUpDown className="h-3 w-3 opacity-60" />
-      </Button>
+      {hasMultipleRoles ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="hidden gap-1.5 text-xs md:inline-flex">
+              <ActiveIcon className="h-3.5 w-3.5 text-primary" />
+              {roleMeta[activeRole].label}
+              <ChevronsUpDown className="h-3 w-3 opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {roles.map((r) => {
+              const Meta = roleMeta[r];
+              const Icon = Meta.icon;
+              return (
+                <DropdownMenuItem key={r} onClick={() => setActiveRole(r).then(() => navigate("/app"))}>
+                  <Icon className="mr-2 h-4 w-4" />
+                  <span className="flex-1">{Meta.label}</span>
+                  {r === activeRole && <Check className="h-4 w-4 text-primary" />}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button variant="ghost" size="sm" className="hidden gap-1.5 text-xs md:inline-flex" disabled>
+          <ActiveIcon className="h-3.5 w-3.5 text-primary" />
+          {roleMeta[activeRole].label}
+        </Button>
+      )}
       <div className="relative ml-2 hidden max-w-md flex-1 md:block">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input placeholder="Search events, vendors, contacts…" className="h-9 pl-9" />
