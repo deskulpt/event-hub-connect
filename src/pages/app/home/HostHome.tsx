@@ -1,22 +1,38 @@
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, MessageSquare, Wallet, Clock, Sparkles, ArrowRight, Heart, Store } from "lucide-react";
-
-const kpis = [
-  { label: "Active events", value: "0", hint: "In planning or booked", icon: CalendarDays, to: "/app/events" },
-  { label: "Pending replies", value: "0", hint: "Awaiting vendor response", icon: MessageSquare, to: "/app/crm/inquiries" },
-  { label: "Budget status", value: "—", hint: "Across active events", icon: Wallet, to: "/app/finance" },
-  { label: "Next event", value: "—", hint: "Days until nearest", icon: Clock, to: "/app/events" },
-];
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, MessageSquare, Wallet, Clock, Sparkles, ArrowRight, Heart, Store, MapPin, Users } from "lucide-react";
+import { format, parseISO, differenceInCalendarDays } from "date-fns";
+import { listEvents } from "@/services/events";
 
 export const HostHome = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(" ")[0] ?? "";
+
+  const { data: events = [] } = useQuery({ queryKey: ["events"], queryFn: listEvents });
+
+  const activeEvents = events.filter((e) => ["draft", "planning", "booked"].includes(e.status));
+  const upcoming = events
+    .filter((e) => e.event_date && new Date(e.event_date) >= new Date(new Date().toDateString()))
+    .sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? ""));
+  const next = upcoming[0];
+  const daysToNext = next?.event_date ? differenceInCalendarDays(parseISO(next.event_date), new Date()) : null;
+
+  const totalBudget = activeEvents.reduce((sum, e) => sum + (e.budget_cents ?? 0), 0);
+  const budgetLabel = totalBudget > 0 ? `$${(totalBudget / 100).toLocaleString()}` : "—";
+
+  const kpis = [
+    { label: "Active events", value: activeEvents.length.toString(), hint: "In planning or booked", icon: CalendarDays, to: "/app/events" },
+    { label: "Pending replies", value: "0", hint: "Awaiting vendor response", icon: MessageSquare, to: "/app/crm/inquiries" },
+    { label: "Budget status", value: budgetLabel, hint: "Across active events", icon: Wallet, to: "/app/finance" },
+    { label: "Next event", value: daysToNext != null ? `${daysToNext}d` : "—", hint: next?.title ?? "Days until nearest", icon: Clock, to: "/app/events" },
+  ];
 
   return (
     <PageLayout
