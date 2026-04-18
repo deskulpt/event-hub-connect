@@ -1,0 +1,69 @@
+import { supabase } from "@/integrations/supabase/client";
+import type { BookingFormInput, BookingRecord, BookingStatus } from "@/types/booking";
+
+const dollarsToCents = (v: unknown): number => {
+  if (v === null || v === undefined || v === "") return 0;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.round(n * 100) : 0;
+};
+
+const formToRow = (input: BookingFormInput) => ({
+  title: input.title,
+  event_id: input.event_id ?? null,
+  inquiry_id: input.inquiry_id ?? null,
+  provider_id: input.provider_id,
+  provider_kind: input.provider_kind,
+  event_date: input.event_date ? String(input.event_date) : null,
+  deposit_cents: dollarsToCents(input.deposit),
+  total_cents: dollarsToCents(input.total),
+  notes: input.notes ? String(input.notes) : null,
+});
+
+export const listBookingsAsHost = async (userId: string): Promise<BookingRecord[]> => {
+  const { data, error } = await supabase
+    .from("bookings").select("*").eq("host_id", userId)
+    .order("event_date", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as BookingRecord[];
+};
+
+export const listBookingsAsProvider = async (userId: string): Promise<BookingRecord[]> => {
+  const { data, error } = await supabase
+    .from("bookings").select("*").eq("provider_id", userId)
+    .order("event_date", { ascending: true, nullsFirst: false });
+  if (error) throw error;
+  return (data ?? []) as BookingRecord[];
+};
+
+export const createBooking = async (input: BookingFormInput, hostId: string): Promise<BookingRecord> => {
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert({ ...formToRow(input), host_id: hostId, status: "pending" as BookingStatus })
+    .select("*").single();
+  if (error) throw error;
+  return data as BookingRecord;
+};
+
+export const updateBookingStatus = async (id: string, status: BookingStatus): Promise<BookingRecord> => {
+  const { data, error } = await supabase.from("bookings").update({ status }).eq("id", id).select("*").single();
+  if (error) throw error;
+  return data as BookingRecord;
+};
+
+export const deleteBooking = async (id: string): Promise<void> => {
+  const { error } = await supabase.from("bookings").delete().eq("id", id);
+  if (error) throw error;
+};
+
+export const countUpcomingBookingsForProvider = async (userId: string): Promise<number> => {
+  const today = new Date().toISOString().slice(0, 10);
+  const { count, error } = await supabase
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .eq("provider_id", userId)
+    .in("status", ["pending", "confirmed", "in_progress"])
+    .or(`event_date.gte.${today},event_date.is.null`);
+  if (error) throw error;
+  return count ?? 0;
+};
