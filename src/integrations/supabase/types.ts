@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          accessibility_notes: string | null
+          budget_cents: number | null
+          city: string | null
+          created_at: string
+          dietary_notes: string | null
+          event_date: string | null
+          event_type: string | null
+          guest_count: number | null
+          id: string
+          owner_id: string
+          status: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at: string
+          vibe: string | null
+        }
+        Insert: {
+          accessibility_notes?: string | null
+          budget_cents?: number | null
+          city?: string | null
+          created_at?: string
+          dietary_notes?: string | null
+          event_date?: string | null
+          event_type?: string | null
+          guest_count?: number | null
+          id?: string
+          owner_id: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at?: string
+          vibe?: string | null
+        }
+        Update: {
+          accessibility_notes?: string | null
+          budget_cents?: number | null
+          city?: string | null
+          created_at?: string
+          dietary_notes?: string | null
+          event_date?: string | null
+          event_type?: string | null
+          guest_count?: number | null
+          id?: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title?: string
+          updated_at?: string
+          vibe?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_role: Database["public"]["Enums"]["app_role"]
@@ -83,6 +134,7 @@ export type Database = {
     }
     Enums: {
       app_role: "host" | "pro" | "business" | "admin"
+      event_status: "draft" | "planning" | "booked" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -211,6 +263,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["host", "pro", "business", "admin"],
+      event_status: ["draft", "planning", "booked", "completed", "cancelled"],
     },
   },
 } as const

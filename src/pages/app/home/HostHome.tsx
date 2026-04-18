@@ -1,22 +1,38 @@
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, MessageSquare, Wallet, Clock, Sparkles, ArrowRight, Heart, Store } from "lucide-react";
-
-const kpis = [
-  { label: "Active events", value: "0", hint: "In planning or booked", icon: CalendarDays, to: "/app/events" },
-  { label: "Pending replies", value: "0", hint: "Awaiting vendor response", icon: MessageSquare, to: "/app/crm/inquiries" },
-  { label: "Budget status", value: "—", hint: "Across active events", icon: Wallet, to: "/app/finance" },
-  { label: "Next event", value: "—", hint: "Days until nearest", icon: Clock, to: "/app/events" },
-];
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, MessageSquare, Wallet, Clock, Sparkles, ArrowRight, Heart, Store, MapPin, Users } from "lucide-react";
+import { format, parseISO, differenceInCalendarDays } from "date-fns";
+import { listEvents } from "@/services/events";
 
 export const HostHome = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const firstName = profile?.full_name?.split(" ")[0] ?? "";
+
+  const { data: events = [] } = useQuery({ queryKey: ["events"], queryFn: listEvents });
+
+  const activeEvents = events.filter((e) => ["draft", "planning", "booked"].includes(e.status));
+  const upcoming = events
+    .filter((e) => e.event_date && new Date(e.event_date) >= new Date(new Date().toDateString()))
+    .sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? ""));
+  const next = upcoming[0];
+  const daysToNext = next?.event_date ? differenceInCalendarDays(parseISO(next.event_date), new Date()) : null;
+
+  const totalBudget = activeEvents.reduce((sum, e) => sum + (e.budget_cents ?? 0), 0);
+  const budgetLabel = totalBudget > 0 ? `$${(totalBudget / 100).toLocaleString()}` : "—";
+
+  const kpis = [
+    { label: "Active events", value: activeEvents.length.toString(), hint: "In planning or booked", icon: CalendarDays, to: "/app/events" },
+    { label: "Pending replies", value: "0", hint: "Awaiting vendor response", icon: MessageSquare, to: "/app/crm/inquiries" },
+    { label: "Budget status", value: budgetLabel, hint: "Across active events", icon: Wallet, to: "/app/finance" },
+    { label: "Next event", value: daysToNext != null ? `${daysToNext}d` : "—", hint: next?.title ?? "Days until nearest", icon: Clock, to: "/app/events" },
+  ];
 
   return (
     <PageLayout
@@ -75,7 +91,32 @@ export const HostHome = () => {
           <Button size="sm" variant="ghost" onClick={() => navigate("/app/events")}>View all<ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No events scheduled. Once you create one, it'll appear here with stage, city, headcount, and budget.</p>
+          {upcoming.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No events scheduled. Once you create one, it'll appear here with stage, city, headcount, and budget.</p>
+          ) : (
+            <div className="space-y-2">
+              {upcoming.slice(0, 5).map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => navigate(`/app/events/${e.id}`)}
+                  className="flex w-full items-center justify-between rounded-md border border-border/60 px-3 py-2 text-left transition-colors hover:bg-muted/50"
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{e.title}</span>
+                      <Badge variant="outline" className="capitalize text-[10px]">{e.status}</Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                      {e.event_date && <span className="inline-flex items-center gap-1"><CalendarDays className="h-3 w-3" />{format(parseISO(e.event_date), "MMM d")}</span>}
+                      {e.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{e.city}</span>}
+                      {e.guest_count != null && <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{e.guest_count}</span>}
+                    </div>
+                  </div>
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
