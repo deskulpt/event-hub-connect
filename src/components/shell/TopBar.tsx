@@ -1,4 +1,4 @@
-import { Bell, Search, Sparkles, ChevronsUpDown, LogOut, User as UserIcon, Settings as SettingsIcon } from "lucide-react";
+import { Bell, Search, Sparkles, ChevronsUpDown, LogOut, User as UserIcon, Settings as SettingsIcon, Check, PartyPopper, Briefcase, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -12,23 +12,61 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, type AppRole } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useActiveRole } from "@/hooks/useActiveRole";
+
+const roleMeta: Record<AppRole, { label: string; icon: typeof PartyPopper }> = {
+  host: { label: "Host workspace", icon: PartyPopper },
+  pro: { label: "Pro workspace", icon: Briefcase },
+  business: { label: "Business workspace", icon: Building2 },
+  admin: { label: "Admin workspace", icon: Sparkles },
+};
 
 export const TopBar = () => {
   const { profile, signOut } = useAuth();
+  const { activeRole, roles, setActiveRole, hasMultipleRoles } = useActiveRole();
   const navigate = useNavigate();
   const [aiOpen, setAiOpen] = useState(false);
   const initials = (profile?.full_name || profile?.email || "U").slice(0, 2).toUpperCase();
+  const ActiveIcon = roleMeta[activeRole].icon;
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border/60 bg-background/80 px-3 backdrop-blur-md">
       <SidebarTrigger />
-      <Button variant="ghost" size="sm" className="hidden gap-1 text-xs md:inline-flex">
-        Personal workspace <ChevronsUpDown className="h-3 w-3 opacity-60" />
-      </Button>
+      {hasMultipleRoles ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="hidden gap-1.5 text-xs md:inline-flex">
+              <ActiveIcon className="h-3.5 w-3.5 text-primary" />
+              {roleMeta[activeRole].label}
+              <ChevronsUpDown className="h-3 w-3 opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {roles.map((r) => {
+              const Meta = roleMeta[r];
+              const Icon = Meta.icon;
+              return (
+                <DropdownMenuItem key={r} onClick={() => setActiveRole(r).then(() => navigate("/app"))}>
+                  <Icon className="mr-2 h-4 w-4" />
+                  <span className="flex-1">{Meta.label}</span>
+                  {r === activeRole && <Check className="h-4 w-4 text-primary" />}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button variant="ghost" size="sm" className="hidden gap-1.5 text-xs md:inline-flex" disabled>
+          <ActiveIcon className="h-3.5 w-3.5 text-primary" />
+          {roleMeta[activeRole].label}
+        </Button>
+      )}
       <div className="relative ml-2 hidden max-w-md flex-1 md:block">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input placeholder="Search events, vendors, contacts…" className="h-9 pl-9" />
