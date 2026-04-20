@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { BentoCard, BentoGrid, GradientOrb, StatTile } from "@/components/shell/Bento";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, CalendarCheck, Wallet, ShieldCheck, ArrowRight, Sparkles, FileText, TrendingUp } from "lucide-react";
+import { MessageSquare, CalendarCheck, Wallet, ShieldCheck, ArrowRight, Sparkles, FileText, TrendingUp, Briefcase } from "lucide-react";
 import { countNewLeadsForRecipient } from "@/services/inquiries";
 import { countUpcomingBookingsForProvider } from "@/services/bookings";
 
@@ -21,100 +21,110 @@ export const ProHome = () => {
     queryKey: ["bookings-upcoming", user?.id], queryFn: () => countUpcomingBookingsForProvider(user!.id), enabled: !!user,
   });
 
-  const kpis = [
-    { label: "New leads", value: newLeads.toString(), hint: "Unread or unresponded", icon: MessageSquare, to: "/app/crm/inquiries" },
-    { label: "Upcoming jobs", value: upcomingJobs.toString(), hint: "Confirmed in next 30 days", icon: CalendarCheck, to: "/app/crm/bookings" },
-    { label: "This month's earnings", value: "$0", hint: "Confirmed revenue", icon: Wallet, to: "/app/finance" },
-    { label: "Insurance status", value: "Missing", hint: "Add to unlock more leads", icon: ShieldCheck, to: "/app/trust/insurance" },
-  ];
-
   const hasLeads = newLeads > 0;
 
   return (
-    <PageLayout
-      rightRail={
-        <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-4 w-4 text-primary" /> Trust nudges
-            </CardTitle>
-            <CardDescription className="text-xs">Boost your visibility</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <p className="text-muted-foreground">Add insurance and verify your identity to unlock high-intent leads.</p>
-            <Button size="sm" className="w-full" onClick={() => navigate("/app/trust/insurance")}>
-              Get covered <ArrowRight className="ml-1 h-3.5 w-3.5" />
-            </Button>
-            <Button size="sm" variant="outline" className="w-full" onClick={() => navigate("/app/trust/verification")}>
-              Verify identity
-            </Button>
-          </CardContent>
-        </Card>
-      }
-    >
+    <PageLayout>
       <PageHeader
+        eyebrow="PRO WORKSPACE"
         title={`Welcome back${firstName ? `, ${firstName}` : ""}`}
         subtitle="Your leads, bookings, and earnings — all in one place."
-        status="PRO"
         primaryCta={
           hasLeads ? (
-            <Button size="sm" onClick={() => navigate("/app/crm/inquiries")}>Respond to leads</Button>
+            <Button size="sm" onClick={() => navigate("/app/crm/inquiries")}><MessageSquare className="h-4 w-4" /> Respond to leads</Button>
           ) : (
-            <Button size="sm" onClick={() => navigate("/app/calendar/availability")}>Update availability</Button>
+            <Button size="sm" onClick={() => navigate("/app/calendar/availability")}><CalendarCheck className="h-4 w-4" /> Update availability</Button>
           )
         }
         secondaryCta={<Button size="sm" variant="outline" onClick={() => navigate("/app/calendar")}>View calendar</Button>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <Card key={k.label} className="cursor-pointer transition-all hover:shadow-md" onClick={() => navigate(k.to)}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground">{k.label}</CardTitle>
-              <k.icon className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="font-display text-2xl font-semibold tabular-nums">{k.value}</div>
-              <p className="mt-1 text-xs text-muted-foreground">{k.hint}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <BentoGrid className="grid-cols-1 md:grid-cols-6">
+        <BentoCard gradient="sunset" className="md:col-span-4 md:row-span-2 overflow-hidden p-7">
+          <GradientOrb color="primary" className="-top-20 -left-10 h-72 w-72" />
+          <GradientOrb color="accent" className="-bottom-20 right-0 h-64 w-64" />
+          <div className="relative flex h-full flex-col justify-between gap-6">
+            <div className="space-y-3">
+              <span className="chip"><Briefcase className="h-3 w-3" /> Pipeline</span>
+              <h2 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight md:text-3xl">
+                {hasLeads ? (
+                  <>
+                    <span className="text-gradient">{newLeads}</span> new lead{newLeads > 1 ? "s" : ""} waiting
+                  </>
+                ) : (
+                  <>Stay <span className="text-gradient">bookable</span> and <span className="text-gradient">discoverable</span>.</>
+                )}
+              </h2>
+              <p className="max-w-md text-sm text-muted-foreground">
+                {hasLeads
+                  ? "Respond fast to win more jobs — average reply time under 4 hours doubles conversion."
+                  : "Update availability and add insurance to surface higher in Fit Score rankings."}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="glass" onClick={() => navigate(hasLeads ? "/app/crm/inquiries" : "/app/calendar/availability")}>
+                {hasLeads ? "Open inquiries" : "Set availability"} <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate("/app/marketplace/pros")}>
+                Edit listings
+              </Button>
+            </div>
+          </div>
+        </BentoCard>
+
+        <StatTile className="md:col-span-2" label="New leads" value={newLeads} hint="Unread or unresponded" icon={MessageSquare} onClick={() => navigate("/app/crm/inquiries")} gradient="ocean" />
+        <StatTile className="md:col-span-2" label="Upcoming jobs" value={upcomingJobs} hint="Confirmed in next 30 days" icon={CalendarCheck} onClick={() => navigate("/app/crm/bookings")} gradient="mint" />
+        <StatTile className="md:col-span-3" label="This month's earnings" value="$0" hint="Confirmed revenue" icon={Wallet} onClick={() => navigate("/app/finance")} gradient="sunset" />
+        <StatTile className="md:col-span-3" label="Insurance status" value="Missing" hint="Add to unlock more leads" icon={ShieldCheck} onClick={() => navigate("/app/trust/insurance")} gradient="aurora" />
+      </BentoGrid>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <BentoCard className="lg:col-span-2 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Pipeline</p>
+              <h3 className="font-display text-lg font-semibold">New leads</h3>
+            </div>
+            <Button size="sm" variant="ghost" onClick={() => navigate("/app/crm/inquiries")}>View all <ArrowRight className="h-3.5 w-3.5" /></Button>
+          </div>
+          <div className="rounded-2xl border border-dashed border-border/60 bg-muted/30 p-8 text-center">
+            <p className="text-sm text-muted-foreground">No new leads right now. Quote, decline, and message actions will appear here.</p>
+          </div>
+        </BentoCard>
+
+        <BentoCard gradient="aurora" className="overflow-hidden p-5">
+          <GradientOrb color="primary" className="-top-10 -right-10 h-40 w-40" />
+          <div className="relative space-y-4">
+            <span className="chip"><Sparkles className="h-3 w-3 text-primary" /> Trust nudges</span>
+            <h3 className="font-display text-lg font-semibold">Boost your visibility</h3>
+            <p className="text-sm text-muted-foreground">Verified Pros get up to 2.4× more high-intent inquiries.</p>
+            <div className="space-y-2">
+              <Button size="sm" className="w-full" onClick={() => navigate("/app/trust/insurance")}>
+                Get covered <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button size="sm" variant="outline" className="w-full" onClick={() => navigate("/app/trust/verification")}>
+                Verify identity
+              </Button>
+            </div>
+          </div>
+        </BentoCard>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">New leads</CardTitle>
-          <Button size="sm" variant="ghost" onClick={() => navigate("/app/crm/inquiries")}>View all<ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">No new leads right now. When hosts inquire, you'll see quote, decline, and message actions here.</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle className="text-base">Upcoming jobs</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Confirmed bookings will appear here with date, host, location, service type, and payment status.</p>
-        </CardContent>
-      </Card>
-
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4 text-primary" />Open quotes</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <BentoCard className="p-5">
+          <div className="space-y-1.5">
+            <span className="chip"><FileText className="h-3 w-3" /> Quotes</span>
+            <h3 className="font-display text-lg font-semibold">Open quotes</h3>
             <p className="text-sm text-muted-foreground">Sent quotes awaiting acceptance will show their status and value here.</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />Earnings snapshot</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Last 30 days vs previous 30 days — chart appears once you have confirmed revenue.</p>
-          </CardContent>
-        </Card>
+          </div>
+        </BentoCard>
+        <BentoCard className="p-5">
+          <div className="space-y-1.5">
+            <span className="chip"><TrendingUp className="h-3 w-3" /> Trends</span>
+            <h3 className="font-display text-lg font-semibold">Earnings snapshot</h3>
+            <p className="text-sm text-muted-foreground">Last 30 days vs previous — chart appears once you have confirmed revenue.</p>
+          </div>
+        </BentoCard>
       </div>
     </PageLayout>
   );
