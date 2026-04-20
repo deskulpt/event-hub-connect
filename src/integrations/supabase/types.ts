@@ -235,6 +235,87 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          currency: string
+          due_on: string | null
+          event_id: string | null
+          id: string
+          issued_on: string
+          line_items: Json
+          notes: string | null
+          number: string
+          owner_id: string
+          paid_on: string | null
+          recipient_email: string | null
+          recipient_name: string
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal_cents: number
+          tax_cents: number
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          due_on?: string | null
+          event_id?: string | null
+          id?: string
+          issued_on?: string
+          line_items?: Json
+          notes?: string | null
+          number: string
+          owner_id: string
+          paid_on?: string | null
+          recipient_email?: string | null
+          recipient_name: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal_cents?: number
+          tax_cents?: number
+          total_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          due_on?: string | null
+          event_id?: string | null
+          id?: string
+          issued_on?: string
+          line_items?: Json
+          notes?: string | null
+          number?: string
+          owner_id?: string
+          paid_on?: string | null
+          recipient_email?: string | null
+          recipient_name?: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal_cents?: number
+          tax_cents?: number
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
@@ -266,6 +347,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payouts: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          expected_on: string | null
+          id: string
+          method: string | null
+          notes: string | null
+          owner_id: string
+          paid_on: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["payout_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          expected_on?: string | null
+          id?: string
+          method?: string | null
+          notes?: string | null
+          owner_id: string
+          paid_on?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          expected_on?: string | null
+          id?: string
+          method?: string | null
+          notes?: string | null
+          owner_id?: string
+          paid_on?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -299,6 +425,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      receipts: {
+        Row: {
+          amount_cents: number
+          category: string | null
+          created_at: string
+          currency: string
+          event_id: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          occurred_on: string
+          owner_id: string
+          updated_at: string
+          vendor_name: string
+        }
+        Insert: {
+          amount_cents?: number
+          category?: string | null
+          created_at?: string
+          currency?: string
+          event_id?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          occurred_on?: string
+          owner_id: string
+          updated_at?: string
+          vendor_name: string
+        }
+        Update: {
+          amount_cents?: number
+          category?: string | null
+          created_at?: string
+          currency?: string
+          event_id?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          occurred_on?: string
+          owner_id?: string
+          updated_at?: string
+          vendor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_listings: {
         Row: {
@@ -371,6 +550,69 @@ export type Database = {
           },
           {
             foreignKeyName: "tasks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount_cents: number
+          booking_id: string | null
+          counterparty: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          event_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["transaction_kind"]
+          occurred_on: string
+          owner_id: string
+          status: Database["public"]["Enums"]["transaction_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          booking_id?: string | null
+          counterparty?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["transaction_kind"]
+          occurred_on?: string
+          owner_id: string
+          status?: Database["public"]["Enums"]["transaction_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          booking_id?: string | null
+          counterparty?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["transaction_kind"]
+          occurred_on?: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["transaction_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
@@ -516,8 +758,18 @@ export type Database = {
         | "refunded"
       event_status: "draft" | "planning" | "booked" | "completed" | "cancelled"
       inquiry_status: "new" | "sent" | "replied" | "declined" | "expired"
+      invoice_status: "draft" | "sent" | "paid" | "overdue" | "void"
+      payout_status: "scheduled" | "in_transit" | "paid" | "failed"
       recipient_kind: "venue" | "pro" | "business"
       task_status: "todo" | "in_progress" | "done" | "blocked"
+      transaction_kind:
+        | "charge"
+        | "refund"
+        | "deposit"
+        | "fee"
+        | "payout"
+        | "expense"
+      transaction_status: "pending" | "succeeded" | "failed" | "refunded"
       vendor_category:
         | "chef"
         | "dj"
@@ -665,8 +917,19 @@ export const Constants = {
       ],
       event_status: ["draft", "planning", "booked", "completed", "cancelled"],
       inquiry_status: ["new", "sent", "replied", "declined", "expired"],
+      invoice_status: ["draft", "sent", "paid", "overdue", "void"],
+      payout_status: ["scheduled", "in_transit", "paid", "failed"],
       recipient_kind: ["venue", "pro", "business"],
       task_status: ["todo", "in_progress", "done", "blocked"],
+      transaction_kind: [
+        "charge",
+        "refund",
+        "deposit",
+        "fee",
+        "payout",
+        "expense",
+      ],
+      transaction_status: ["pending", "succeeded", "failed", "refunded"],
       vendor_category: [
         "chef",
         "dj",
