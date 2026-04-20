@@ -5,13 +5,16 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { EmptyState } from "@/components/shell/EmptyState";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BentoCard } from "@/components/shell/Bento";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { deleteVendor, listOwnVendors } from "@/services/listings";
 import { VendorFormDialog } from "@/components/marketplace/VendorFormDialog";
+import { ListingCover } from "@/components/marketplace/ListingCover";
 import { formatCents } from "@/lib/fitScore";
+
+const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 
 export default function Pros() {
   const { user } = useAuth();
@@ -35,6 +38,7 @@ export default function Pros() {
   return (
     <PageLayout>
       <PageHeader
+        eyebrow="Marketplace"
         title="My services"
         subtitle="Manage your service listings — chef, DJ, photographer, planner, and more."
         primaryCta={<VendorFormDialog />}
@@ -49,37 +53,38 @@ export default function Pros() {
         <p className="text-sm text-muted-foreground">Loading listings…</p>
       ) : rows.length === 0 ? (
         <EmptyState
-          icon={<Briefcase className="h-5 w-5 text-primary" />}
+          icon={<Briefcase className="h-5 w-5 text-primary-foreground" />}
           title="No listings yet"
           description="Create your first service listing with category, city, and base price."
           action={<VendorFormDialog />}
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((row) => (
-            <Card key={row.id}>
-              <CardHeader className="space-y-1.5 pb-2">
+            <BentoCard key={row.id} className="overflow-hidden p-0">
+              <ListingCover seed={row.id} initials={initials(row.name)} photoUrl={row.photo_url} />
+              <div className="space-y-3 p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-base">{row.name}</CardTitle>
-                  <Badge variant={row.published ? "default" : "secondary"}>
+                  <div className="min-w-0">
+                    <h3 className="truncate font-display text-base font-semibold">{row.name}</h3>
+                    <p className="text-xs text-muted-foreground capitalize">{row.category} · {row.city ?? "—"}</p>
+                  </div>
+                  <Badge variant={row.published ? "default" : "secondary"} className="shrink-0">
                     {row.published ? "Published" : "Draft"}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground capitalize">{row.category} · {row.city ?? "—"}</p>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex justify-between tabular-nums">
-                  <span className="text-muted-foreground">From</span>
-                  <span>{formatCents(row.base_price_cents)}</span>
+                <div className="rounded-lg border border-border/60 bg-muted/30 p-2 text-xs">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">From</div>
+                  <div className="font-medium tabular-nums">{formatCents(row.base_price_cents)}</div>
                 </div>
-                <div className="flex items-center justify-between gap-2 pt-2">
+                <div className="flex items-center justify-between gap-2 border-t border-border/50 pt-2">
                   <VendorFormDialog initial={row} />
                   <Button size="icon" variant="ghost" onClick={() => removeMut.mutate(row.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </BentoCard>
           ))}
         </div>
       )}
