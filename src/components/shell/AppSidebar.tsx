@@ -79,26 +79,43 @@ export const AppSidebar = () => {
   const items = navByRole[activeRole];
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarContent>
-        <div className="flex h-16 items-center gap-2 px-4">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-sunset shadow-soft">
+    <Sidebar collapsible="icon" className="border-r border-border/40">
+      <SidebarContent className="bg-sidebar/60 backdrop-blur-xl">
+        <div className="flex h-16 items-center gap-2.5 px-4">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-sunset shadow-glow">
             <Sparkles className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-sunset opacity-50 blur-md -z-10" />
           </div>
-          {!collapsed && <span className="font-display text-lg font-semibold text-secondary">Vibely</span>}
+          {!collapsed && (
+            <div className="flex flex-col leading-none">
+              <span className="font-display text-lg font-semibold tracking-tight text-foreground">Vibely</span>
+              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">{labelByRole[activeRole].split(" ")[0]}</span>
+            </div>
+          )}
         </div>
-        <SidebarGroup>
-          <SidebarGroupLabel>{labelByRole[activeRole]}</SidebarGroupLabel>
+        <SidebarGroup className="px-2">
+          {!collapsed && (
+            <SidebarGroupLabel className="px-2 text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/70">
+              Navigate
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {items.map((item) => {
                 const isActive = item.end
                   ? location.pathname === item.url
                   : location.pathname.startsWith(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      className="group relative h-9 rounded-xl text-sm font-medium transition-all data-[active=true]:bg-gradient-sunset/10 data-[active=true]:text-primary data-[active=true]:shadow-soft"
+                    >
                       <NavLink to={item.url} end={item.end}>
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-gradient-sunset" />
+                        )}
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span>{item.title}</span>}
                       </NavLink>
@@ -109,6 +126,19 @@ export const AppSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {!collapsed && (
+          <div className="mt-auto px-3 pb-4">
+            <div className="rounded-2xl border border-primary/20 bg-gradient-sunset/5 p-3 backdrop-blur">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <p className="font-display text-xs font-semibold">Vibely AI</p>
+              </div>
+              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                Brief → match → call → confirm. End-to-end automation.
+              </p>
+            </div>
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );

@@ -7,11 +7,11 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 export const AppLayout = () => (
   <ProtectedRoute>
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-muted/20">
+      <div className="relative flex min-h-screen w-full bg-mesh">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />
-          <main className="flex-1 px-4 py-5 md:px-6 md:py-6">
+          <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
             <Outlet />
           </main>
         </div>

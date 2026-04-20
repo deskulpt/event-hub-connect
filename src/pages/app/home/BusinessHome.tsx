@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { BentoCard, BentoGrid, GradientOrb, StatTile } from "@/components/shell/Bento";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, FileText, Wallet, ShieldCheck, ArrowRight, Sparkles, TrendingUp, Users } from "lucide-react";
+import { CalendarDays, FileText, Wallet, ShieldCheck, ArrowRight, Sparkles, TrendingUp, Users, Building2 } from "lucide-react";
 import { countNewLeadsForRecipient } from "@/services/inquiries";
 import { countUpcomingBookingsForProvider } from "@/services/bookings";
 
@@ -21,99 +21,100 @@ export const BusinessHome = () => {
     queryKey: ["bookings-upcoming", user?.id], queryFn: () => countUpcomingBookingsForProvider(user!.id), enabled: !!user,
   });
 
-  const kpis = [
-    { label: "Open quotes", value: newLeads.toString(), hint: "Inquiries awaiting reply", icon: FileText, to: "/app/crm/inquiries" },
-    { label: "Upcoming bookings", value: upcomingJobs.toString(), hint: "Confirmed reservations", icon: CalendarDays, to: "/app/crm/bookings" },
-    { label: "Payouts", value: "$0", hint: "Upcoming or pending", icon: Wallet, to: "/app/finance/payouts" },
-    { label: "Compliance", value: "Action needed", hint: "Verification & insurance", icon: ShieldCheck, to: "/app/trust" },
-  ];
-
   return (
-    <PageLayout
-      rightRail={
-        <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-4 w-4 text-primary" /> AI suggestions
-            </CardTitle>
-            <CardDescription className="text-xs">Operational signal</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <p className="text-muted-foreground">No matches yet. As inquiries arrive, we'll surface high-fit opportunities and scheduling conflicts here.</p>
-            <Button size="sm" variant="outline" className="w-full" onClick={() => navigate("/app/crm/inquiries")}>
-              Review inquiries <ArrowRight className="ml-1 h-3.5 w-3.5" />
-            </Button>
-          </CardContent>
-        </Card>
-      }
-    >
+    <PageLayout>
       <PageHeader
+        eyebrow="BUSINESS WORKSPACE"
         title={`Welcome back${firstName ? `, ${firstName}` : ""}`}
         subtitle="Your operations, bookings, and revenue — at a glance."
-        status="BUSINESS"
-        primaryCta={<Button size="sm" onClick={() => navigate("/app/crm/bookings")}>Create booking</Button>}
-        secondaryCta={<Button size="sm" variant="outline" onClick={() => navigate("/app/crm/pipeline")}>Review open quotes</Button>}
+        primaryCta={<Button size="sm" onClick={() => navigate("/app/crm/bookings")}><CalendarDays className="h-4 w-4" /> Create booking</Button>}
+        secondaryCta={<Button size="sm" variant="outline" onClick={() => navigate("/app/crm/pipeline")}>Review quotes</Button>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <Card key={k.label} className="cursor-pointer transition-all hover:shadow-md" onClick={() => navigate(k.to)}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground">{k.label}</CardTitle>
-              <k.icon className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="font-display text-2xl font-semibold tabular-nums">{k.value}</div>
-              <p className="mt-1 text-xs text-muted-foreground">{k.hint}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <BentoGrid className="grid-cols-1 md:grid-cols-6">
+        <BentoCard gradient="aurora" className="md:col-span-4 md:row-span-2 overflow-hidden p-7">
+          <GradientOrb color="secondary" className="-top-20 -left-10 h-72 w-72" />
+          <GradientOrb color="primary" className="-bottom-20 right-0 h-64 w-64" />
+          <div className="relative flex h-full flex-col justify-between gap-6">
+            <div className="space-y-3">
+              <span className="chip"><Building2 className="h-3 w-3" /> Operations</span>
+              <h2 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight md:text-3xl">
+                {newLeads > 0 ? (
+                  <><span className="text-gradient-aurora">{newLeads}</span> open quote{newLeads > 1 ? "s" : ""} need attention</>
+                ) : (
+                  <>Run your venue like a <span className="text-gradient-aurora">modern operating system</span>.</>
+                )}
+              </h2>
+              <p className="max-w-md text-sm text-muted-foreground">
+                Centralize bookings, payouts, compliance, and team operations in one place.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="glass" onClick={() => navigate("/app/crm/pipeline")}>
+                Open pipeline <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate("/app/marketplace/venues")}>
+                Manage listings
+              </Button>
+            </div>
+          </div>
+        </BentoCard>
+
+        <StatTile className="md:col-span-2" label="Open quotes" value={newLeads} hint="Inquiries awaiting reply" icon={FileText} onClick={() => navigate("/app/crm/inquiries")} gradient="ocean" />
+        <StatTile className="md:col-span-2" label="Upcoming bookings" value={upcomingJobs} hint="Confirmed reservations" icon={CalendarDays} onClick={() => navigate("/app/crm/bookings")} gradient="mint" />
+        <StatTile className="md:col-span-3" label="Payouts" value="$0" hint="Upcoming or pending" icon={Wallet} onClick={() => navigate("/app/finance/payouts")} gradient="sunset" />
+        <StatTile className="md:col-span-3" label="Compliance" value="Action needed" hint="Verification & insurance" icon={ShieldCheck} onClick={() => navigate("/app/trust")} gradient="aurora" />
+      </BentoGrid>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <BentoCard className="lg:col-span-2 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Today</p>
+              <h3 className="font-display text-lg font-semibold">Priorities</h3>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-dashed border-border/60 bg-muted/30 p-8 text-center">
+            <p className="text-sm text-muted-foreground">Expiring quotes, overdue invoices, compliance alerts, and disputes will land here.</p>
+          </div>
+        </BentoCard>
+
+        <BentoCard gradient="aurora" className="overflow-hidden p-5">
+          <GradientOrb color="primary" className="-top-10 -right-10 h-40 w-40" />
+          <div className="relative space-y-4">
+            <span className="chip"><Sparkles className="h-3 w-3 text-primary" /> AI signal</span>
+            <h3 className="font-display text-lg font-semibold">Operational copilot</h3>
+            <p className="text-sm text-muted-foreground">As inquiries arrive, we'll surface high-fit opportunities and conflicts here.</p>
+            <Button size="sm" variant="outline" className="w-full" onClick={() => navigate("/app/crm/inquiries")}>
+              Review inquiries <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </BentoCard>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Today's priorities</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Expiring quotes, overdue invoices, compliance alerts, and open disputes will land here.</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Upcoming bookings</CardTitle>
-          <Button size="sm" variant="ghost" onClick={() => navigate("/app/crm/bookings")}>View all<ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Confirmed bookings will appear here with event name, host, space/service, and revenue.</p>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4 text-primary" />Quotes pipeline</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Send-to-acceptance conversion will be tracked here as quotes flow through.</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />Revenue snapshot</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">This month vs last month — chart populates with your first confirmed bookings.</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-3">
+        <BentoCard className="p-5">
+          <div className="space-y-1.5">
+            <span className="chip"><FileText className="h-3 w-3" /> Pipeline</span>
+            <h3 className="font-display text-base font-semibold">Quotes pipeline</h3>
+            <p className="text-xs text-muted-foreground">Send-to-acceptance conversion tracked here.</p>
+          </div>
+        </BentoCard>
+        <BentoCard className="p-5">
+          <div className="space-y-1.5">
+            <span className="chip"><TrendingUp className="h-3 w-3" /> Trends</span>
+            <h3 className="font-display text-base font-semibold">Revenue snapshot</h3>
+            <p className="text-xs text-muted-foreground">This month vs last — chart populates with bookings.</p>
+          </div>
+        </BentoCard>
+        <BentoCard className="p-5">
+          <div className="space-y-1.5">
+            <span className="chip"><Users className="h-3 w-3" /> Resources</span>
+            <h3 className="font-display text-base font-semibold">Staff alerts</h3>
+            <p className="text-xs text-muted-foreground">Conflicts, unassigned roles, and capacity warnings.</p>
+          </div>
+        </BentoCard>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-primary" />Staff & resource alerts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Scheduling conflicts, unassigned roles, and low-capacity warnings will surface here.</p>
-        </CardContent>
-      </Card>
     </PageLayout>
   );
 };
