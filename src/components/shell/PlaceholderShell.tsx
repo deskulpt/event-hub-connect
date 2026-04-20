@@ -33,16 +33,16 @@ export const PlaceholderShell = ({
       title={title}
       subtitle={subtitle}
       status={status}
-      primaryCta={<Button size="sm">{ctaLabel}<ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>}
-      secondaryCta={secondaryCtaLabel ? <Button size="sm" variant="outline">{secondaryCtaLabel}</Button> : undefined}
+      primaryCta={<Button size="sm" className="rounded-full">{ctaLabel}<ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>}
+      secondaryCta={secondaryCtaLabel ? <Button size="sm" variant="outline" className="rounded-full">{secondaryCtaLabel}</Button> : undefined}
     />
     <ActionStrip filters={filters} />
     {children ?? (
       <EmptyState
-        icon={Icon ? <Icon className="h-5 w-5 text-primary" /> : undefined}
+        icon={Icon ? <Icon className="h-6 w-6 text-primary-foreground" /> : undefined}
         title={emptyTitle}
         description={emptyDesc}
-        action={<Button size="sm">{ctaLabel}</Button>}
+        action={<Button size="sm" className="rounded-full">{ctaLabel}</Button>}
       />
     )}
   </PageLayout>
