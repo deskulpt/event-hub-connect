@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, BookmarkCheck, BookmarkPlus, MapPin, Sparkles } from "lucide-react";
+import { ArrowLeft, BookmarkCheck, BookmarkPlus, MapPin, Sparkles, Wallet, Users } from "lucide-react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { EmptyState } from "@/components/shell/EmptyState";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BentoCard, GradientOrb } from "@/components/shell/Bento";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +20,25 @@ import {
 } from "@/services/listings";
 import { SendInquiryDialog } from "@/components/crm/SendInquiryDialog";
 import { formatCents, scoreVendorFit, scoreVenueFit } from "@/lib/fitScore";
+import { FitRing } from "@/components/marketplace/FitRing";
+import { ListingCover } from "@/components/marketplace/ListingCover";
+
+const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
+
+const FitBar = ({ label, value }: { label: string; value: number }) => {
+  const pct = Math.round(value * 100);
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span>{label}</span>
+        <span className="tabular-nums">{pct}</span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+        <div className="h-full rounded-full bg-gradient-sunset transition-all" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+};
 
 export default function ListingDetail() {
   const { user } = useAuth();
@@ -82,41 +101,11 @@ export default function ListingDetail() {
   const description = kind === "venue" ? venue?.description : vendor?.description;
   const tags = kind === "venue" ? venue?.vibe_tags : vendor?.vibe_tags;
   const price = kind === "venue" ? venue?.base_price_cents : vendor?.base_price_cents;
+  const photo = kind === "venue" ? venue?.photo_url : vendor?.photo_url;
 
   return (
     <PageLayout>
-      <PageHeader
-        title={name ?? "Listing"}
-        subtitle={
-          activeEvent
-            ? `Validate fit against "${activeEvent.title}" — capacity, vibe, budget, and bookability.`
-            : "Validate fit, capacity, pricing, policies, and bookability."
-        }
-        primaryCta={
-          ownerId && user ? (
-            <SendInquiryDialog
-              eventId={activeEvent?.id ?? null}
-              defaultSubject={name ? `Inquiry: ${name}` : ""}
-              triggerLabel="Send inquiry"
-            />
-          ) : undefined
-        }
-        secondaryCta={
-          user && id ? (
-            <Button
-              size="sm"
-              variant={savedQ.data ? "secondary" : "outline"}
-              onClick={() => saveMut.mutate()}
-              disabled={busy}
-            >
-              {savedQ.data ? <BookmarkCheck className="mr-1 h-4 w-4" /> : <BookmarkPlus className="mr-1 h-4 w-4" />}
-              {savedQ.data ? "Saved" : "Save"}
-            </Button>
-          ) : undefined
-        }
-      />
-
-      <Button asChild size="sm" variant="ghost" className="w-fit -mt-2">
+      <Button asChild size="sm" variant="ghost" className="w-fit">
         <Link to="/app/marketplace"><ArrowLeft className="mr-1 h-4 w-4" /> Back to discover</Link>
       </Button>
 
@@ -124,65 +113,116 @@ export default function ListingDetail() {
         <p className="text-sm text-muted-foreground">Loading listing…</p>
       ) : !found ? (
         <EmptyState
-          icon={<MapPin className="h-5 w-5 text-primary" />}
+          icon={<MapPin className="h-5 w-5 text-primary-foreground" />}
           title="Listing not found"
           description="It may have been unpublished. Pick another from Discover."
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-          <div className="space-y-4">
-            <Card>
-              <CardHeader className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">About</CardTitle>
-                  <Badge variant="secondary">Fit {fit.total}</Badge>
+        <>
+          <BentoCard className="relative overflow-hidden p-0">
+            <GradientOrb color="accent" className="-top-20 -right-10 h-64 w-64" />
+            <ListingCover seed={id ?? ""} initials={name ? initials(name) : "—"} photoUrl={photo} className="h-40" />
+            <div className="relative flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">{kind === "venue" ? "Venue" : "Pro"}</span>
+                  {kind === "pro" && vendor && (
+                    <Badge variant="outline" className="rounded-full text-[10px] capitalize">{vendor.category}</Badge>
+                  )}
                 </div>
-                <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {kind === "pro" && vendor && <span className="capitalize">{vendor.category}</span>}
-                  {kind === "pro" && vendor && <span>·</span>}
-                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {city ?? "—"}</span>
+                <h1 className="font-display text-2xl font-semibold leading-tight">{name}</h1>
+                <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" /> {city ?? "—"}
                 </p>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <p className="leading-relaxed text-foreground/90">
+              </div>
+              <div className="flex items-center gap-3">
+                <FitRing score={fit.total} size={64} />
+                {user && id && (
+                  <Button
+                    size="sm"
+                    variant={savedQ.data ? "secondary" : "outline"}
+                    onClick={() => saveMut.mutate()}
+                    disabled={busy}
+                  >
+                    {savedQ.data ? <BookmarkCheck className="mr-1 h-4 w-4" /> : <BookmarkPlus className="mr-1 h-4 w-4" />}
+                    {savedQ.data ? "Saved" : "Save"}
+                  </Button>
+                )}
+                {ownerId && user && (
+                  <SendInquiryDialog
+                    eventId={activeEvent?.id ?? null}
+                    defaultSubject={name ? `Inquiry: ${name}` : ""}
+                    triggerLabel="Send inquiry"
+                  />
+                )}
+              </div>
+            </div>
+          </BentoCard>
+
+          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+            <div className="space-y-4">
+              <BentoCard className="p-5">
+                <h2 className="mb-2 font-display text-base font-semibold">About</h2>
+                <p className="leading-relaxed text-sm text-foreground/90">
                   {description || "No description yet."}
                 </p>
                 {tags && tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {tags.map((t) => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {tags.map((t) => <Badge key={t} variant="outline" className="capitalize text-[10px]">{t}</Badge>)}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </BentoCard>
 
-          <aside className="space-y-3">
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">Pricing</CardTitle></CardHeader>
-              <CardContent className="text-sm">
-                <div className="flex justify-between tabular-nums">
-                  <span className="text-muted-foreground">From</span>
-                  <span className="font-medium">{formatCents(price)}</span>
-                </div>
-                {kind === "venue" && venue && (
-                  <div className="mt-1 flex justify-between tabular-nums">
-                    <span className="text-muted-foreground">Capacity</span>
-                    <span>{venue.capacity_min ?? 0}–{venue.capacity_max ?? 0}</span>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <BentoCard className="p-4">
+                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <Wallet className="h-3 w-3" /> Starting at
                   </div>
+                  <div className="mt-1 font-display text-xl font-semibold tabular-nums">{formatCents(price)}</div>
+                </BentoCard>
+                {kind === "venue" && venue && (
+                  <BentoCard className="p-4">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                      <Users className="h-3 w-3" /> Capacity
+                    </div>
+                    <div className="mt-1 font-display text-xl font-semibold tabular-nums">
+                      {venue.capacity_min ?? 0}–{venue.capacity_max ?? 0}
+                    </div>
+                  </BentoCard>
                 )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="flex items-center gap-1 text-sm"><Sparkles className="h-3.5 w-3.5" /> Fit breakdown</CardTitle></CardHeader>
-              <CardContent className="space-y-1 text-xs text-muted-foreground">
-                <div className="flex justify-between"><span>City</span><span>{Math.round(fit.city * 100)}</span></div>
-                {kind === "venue" && <div className="flex justify-between"><span>Capacity</span><span>{Math.round(fit.capacity * 100)}</span></div>}
-                <div className="flex justify-between"><span>Vibe</span><span>{Math.round(fit.vibe * 100)}</span></div>
-                <div className="flex justify-between"><span>Budget</span><span>{Math.round(fit.budget * 100)}</span></div>
-              </CardContent>
-            </Card>
-          </aside>
-        </div>
+                <BentoCard className="p-4">
+                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <MapPin className="h-3 w-3" /> Location
+                  </div>
+                  <div className="mt-1 font-display text-xl font-semibold">{city ?? "—"}</div>
+                </BentoCard>
+              </div>
+            </div>
+
+            <aside className="space-y-3">
+              <BentoCard className="p-5" gradient="sunset">
+                <div className="mb-3 flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="font-display text-sm font-semibold">Fit breakdown</h3>
+                </div>
+                <div className="mb-4 flex items-center justify-center">
+                  <FitRing score={fit.total} size={84} />
+                </div>
+                <div className="space-y-2.5">
+                  <FitBar label="City match" value={fit.city} />
+                  {kind === "venue" && <FitBar label="Capacity" value={fit.capacity} />}
+                  <FitBar label="Vibe overlap" value={fit.vibe} />
+                  <FitBar label="Budget" value={fit.budget} />
+                </div>
+                {activeEvent && (
+                  <p className="mt-4 text-[10px] text-muted-foreground">
+                    Scored against <span className="font-medium text-foreground">{activeEvent.title}</span>
+                  </p>
+                )}
+              </BentoCard>
+            </aside>
+          </div>
+        </>
       )}
     </PageLayout>
   );
