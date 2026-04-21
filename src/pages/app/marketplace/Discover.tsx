@@ -87,6 +87,8 @@ export default function Discover() {
         }
       />
 
+      <NearbyPlacesStrip />
+
       <BentoCard className="relative overflow-hidden p-4">
         <GradientOrb color="primary" className="-top-16 -right-10 h-48 w-48" />
         <div className="relative grid gap-3 md:grid-cols-[1fr_180px_180px]">
