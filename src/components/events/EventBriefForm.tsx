@@ -17,6 +17,7 @@ import {
 import { eventBriefSchema, EVENT_TYPES, type EventBriefInput, type EventRecord } from "@/types/event";
 import { ArrowLeft, ArrowRight, Check, Loader2, CalendarDays, MapPin, Users, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CityAutocomplete } from "@/components/CityAutocomplete";
 
 interface EventBriefFormProps {
   initial?: EventRecord;
@@ -138,7 +139,12 @@ export const EventBriefForm = ({ initial, submitLabel, onSubmit, onCancel, submi
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="city">City</Label>
-            <Input id="city" placeholder="Brooklyn, NY" {...register("city")} />
+            <CityAutocomplete
+              id="city"
+              value={(values.city as string) ?? ""}
+              onChange={(v) => setValue("city", v, { shouldDirty: true, shouldValidate: true })}
+              placeholder="Brooklyn, NY"
+            />
           </div>
         </div>
       )}

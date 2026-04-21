@@ -19,6 +19,8 @@ import { VENDOR_CATEGORIES, type VendorCategory } from "@/types/listing";
 import { formatCents, scoreVendorFit, scoreVenueFit } from "@/lib/fitScore";
 import { FitRing } from "@/components/marketplace/FitRing";
 import { ListingCover } from "@/components/marketplace/ListingCover";
+import { NearbyPlacesStrip } from "@/components/marketplace/NearbyPlacesStrip";
+import { CityAutocomplete } from "@/components/CityAutocomplete";
 
 const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 
@@ -85,6 +87,8 @@ export default function Discover() {
         }
       />
 
+      <NearbyPlacesStrip />
+
       <BentoCard className="relative overflow-hidden p-4">
         <GradientOrb color="primary" className="-top-16 -right-10 h-48 w-48" />
         <div className="relative grid gap-3 md:grid-cols-[1fr_180px_180px]">
@@ -97,7 +101,7 @@ export default function Discover() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="city" className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">City</Label>
-            <Input id="city" placeholder="Any city" value={city} onChange={(e) => setCity(e.target.value)} />
+            <CityAutocomplete id="city" value={city} onChange={(v) => setCity(v)} placeholder="Any city" />
           </div>
           {tab === "venue" ? (
             <div className="space-y-1.5">
