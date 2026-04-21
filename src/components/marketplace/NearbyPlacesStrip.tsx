@@ -60,7 +60,7 @@ export const NearbyPlacesStrip = () => {
 
   return (
     <BentoCard className="relative overflow-hidden p-4">
-      <GradientOrb color="aurora" className="-top-16 -right-10 h-48 w-48" />
+      <GradientOrb color="tertiary" className="-top-16 -right-10 h-48 w-48" />
       <div className="relative space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="space-y-0.5">
