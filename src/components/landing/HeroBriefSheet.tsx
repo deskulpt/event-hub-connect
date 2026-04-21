@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { savePendingBrief } from "@/lib/pendingBrief";
+import { CityAutocomplete } from "@/components/CityAutocomplete";
 
 const EVENT_CHIPS = [
   { id: "casual", label: "Casual", icon: PartyPopper },
@@ -166,15 +167,13 @@ export const HeroBriefSheet = () => {
                   <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
                 </PopoverContent>
               </Popover>
-              <div className="relative">
-                <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
-                <Input
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="City"
-                  className="h-11 rounded-xl pl-10"
-                />
-              </div>
+              <CityAutocomplete
+                id="hero-city"
+                value={city}
+                onChange={(v) => setCity(v)}
+                placeholder="City"
+                inputClassName="h-11 rounded-xl"
+              />
             </div>
 
             <Button
