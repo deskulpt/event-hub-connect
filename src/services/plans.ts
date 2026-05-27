@@ -26,12 +26,12 @@ export const getEventPlan = async (eventId: string): Promise<EventPlan | null> =
   const { data, error } = await supabase
     .from("event_plans").select("*").eq("event_id", eventId).maybeSingle();
   if (error) throw error;
-  return data as EventPlan | null;
+  return (data as unknown as EventPlan) ?? null;
 };
 
 export const generateEventPlan = async (eventId: string): Promise<EventPlan> => {
   const { data, error } = await supabase.functions.invoke("generate-plan", { body: { event_id: eventId } });
   if (error) throw error;
   if (data?.error) throw new Error(data.error);
-  return data.plan as EventPlan;
+  return data.plan as unknown as EventPlan;
 };
