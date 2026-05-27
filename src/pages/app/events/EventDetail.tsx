@@ -17,7 +17,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EventBriefForm } from "@/components/events/EventBriefForm";
 import { SendInquiryDialog } from "@/components/crm/SendInquiryDialog";
+import { ShareInviteDialog } from "@/components/events/ShareInviteDialog";
+import { EventPlanPanel } from "@/components/events/EventPlanPanel";
 import { deleteEvent, getEvent, updateEvent } from "@/services/events";
+import { generateEventPlan } from "@/services/plans";
 import type { EventBriefInput, EventStatus } from "@/types/event";
 
 const statusVariant: Record<EventStatus, "default" | "secondary" | "outline"> = {
@@ -105,9 +108,14 @@ export default function EventDetail() {
         title={event.title}
         subtitle={event.vibe ?? "Move this event from current stage to confirmed execution."}
         status={event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-        primaryCta={<Button size="sm"><Sparkles className="mr-1 h-4 w-4" /> Generate plan</Button>}
+        primaryCta={
+          <Button size="sm" onClick={() => { generateEventPlan(event.id).then(() => queryClient.invalidateQueries({ queryKey: ["event-plan", event.id] })).catch((e) => toast.error(e.message ?? "Plan generation failed")); }}>
+            <Sparkles className="mr-1 h-4 w-4" /> Generate plan
+          </Button>
+        }
         secondaryCta={
           <>
+            <ShareInviteDialog eventId={event.id} eventTitle={event.title} />
             <SendInquiryDialog eventId={event.id} defaultSubject={event.title} triggerLabel="Send inquiry" />
             <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
               <Pencil className="mr-1 h-4 w-4" /> Edit brief
@@ -167,6 +175,8 @@ export default function EventDetail() {
           </CardContent>
         </Card>
       </div>
+
+      <EventPlanPanel eventId={event.id} eventDate={event.event_date} />
 
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
