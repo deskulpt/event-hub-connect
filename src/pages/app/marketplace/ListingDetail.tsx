@@ -22,6 +22,7 @@ import { SendInquiryDialog } from "@/components/crm/SendInquiryDialog";
 import { formatCents, scoreVendorFit, scoreVenueFit } from "@/lib/fitScore";
 import { FitRing } from "@/components/marketplace/FitRing";
 import { ListingCover } from "@/components/marketplace/ListingCover";
+import { ReviewsSection } from "@/components/marketplace/ReviewsSection";
 
 const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 
@@ -197,6 +198,9 @@ export default function ListingDetail() {
                   <div className="mt-1 font-display text-xl font-semibold">{city ?? "—"}</div>
                 </BentoCard>
               </div>
+              </div>
+
+              {id && <ReviewsSection kind={kind} subjectId={id} />}
             </div>
 
             <aside className="space-y-3">

@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/auth/Auth";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Onboarding from "./pages/auth/Onboarding";
+import InvitePage from "./pages/InvitePage";
 import { AppLayout } from "./layouts/AppLayout";
 
 import Home from "./pages/app/Home";
@@ -61,6 +62,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/i/:slug" element={<InvitePage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
