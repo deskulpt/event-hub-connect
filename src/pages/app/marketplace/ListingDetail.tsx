@@ -199,7 +199,7 @@ export default function ListingDetail() {
                 </BentoCard>
               </div>
 
-              {id && <ReviewsSection kind={kind} subjectId={id} />}
+              {id && <ReviewsSection kind={kind === "pro" ? "vendor" : "venue"} subjectId={id} />}
             </div>
 
             <aside className="space-y-3">
