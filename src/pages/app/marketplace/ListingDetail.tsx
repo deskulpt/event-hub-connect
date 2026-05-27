@@ -198,9 +198,8 @@ export default function ListingDetail() {
                   <div className="mt-1 font-display text-xl font-semibold">{city ?? "—"}</div>
                 </BentoCard>
               </div>
-              </div>
 
-              {id && <ReviewsSection kind={kind} subjectId={id} />}
+              {id && <ReviewsSection kind={kind === "pro" ? "vendor" : "venue"} subjectId={id} />}
             </div>
 
             <aside className="space-y-3">
