@@ -119,6 +119,87 @@ export type Database = {
         }
         Relationships: []
       }
+      event_invites: {
+        Row: {
+          copy: string | null
+          created_at: string
+          event_id: string
+          headline: string | null
+          id: string
+          image_url: string | null
+          owner_id: string
+          rsvp_enabled: boolean
+          slug: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          copy?: string | null
+          created_at?: string
+          event_id: string
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          owner_id: string
+          rsvp_enabled?: boolean
+          slug: string
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          copy?: string | null
+          created_at?: string
+          event_id?: string
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          owner_id?: string
+          rsvp_enabled?: boolean
+          slug?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      event_plans: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          model: string | null
+          owner_id: string
+          shortlist: Json
+          summary: string | null
+          tasks: Json
+          timeline: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          model?: string | null
+          owner_id: string
+          shortlist?: Json
+          summary?: string | null
+          tasks?: Json
+          timeline?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          model?: string | null
+          owner_id?: string
+          shortlist?: Json
+          summary?: string | null
+          tasks?: Json
+          timeline?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           accessibility_notes: string | null
@@ -479,6 +560,45 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          author_id: string
+          body: string | null
+          booking_id: string | null
+          created_at: string
+          id: string
+          rating: number
+          subject_id: string
+          subject_kind: Database["public"]["Enums"]["review_subject"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          subject_id: string
+          subject_kind: Database["public"]["Enums"]["review_subject"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          subject_id?: string
+          subject_kind?: Database["public"]["Enums"]["review_subject"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       saved_listings: {
         Row: {
           created_at: string
@@ -734,6 +854,63 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_calls: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          event_id: string | null
+          id: string
+          inquiry_id: string | null
+          outcome: Database["public"]["Enums"]["voice_call_outcome"] | null
+          owner_id: string
+          phone: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["voice_call_status"]
+          summary: string | null
+          target_id: string | null
+          target_kind: Database["public"]["Enums"]["review_subject"] | null
+          target_name: string | null
+          transcript: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          event_id?: string | null
+          id?: string
+          inquiry_id?: string | null
+          outcome?: Database["public"]["Enums"]["voice_call_outcome"] | null
+          owner_id: string
+          phone?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["voice_call_status"]
+          summary?: string | null
+          target_id?: string | null
+          target_kind?: Database["public"]["Enums"]["review_subject"] | null
+          target_name?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          event_id?: string | null
+          id?: string
+          inquiry_id?: string | null
+          outcome?: Database["public"]["Enums"]["voice_call_outcome"] | null
+          owner_id?: string
+          phone?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["voice_call_status"]
+          summary?: string | null
+          target_id?: string | null
+          target_kind?: Database["public"]["Enums"]["review_subject"] | null
+          target_name?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -761,6 +938,7 @@ export type Database = {
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "void"
       payout_status: "scheduled" | "in_transit" | "paid" | "failed"
       recipient_kind: "venue" | "pro" | "business"
+      review_subject: "venue" | "vendor"
       task_status: "todo" | "in_progress" | "done" | "blocked"
       transaction_kind:
         | "charge"
@@ -779,6 +957,13 @@ export type Database = {
         | "caterer"
         | "florist"
         | "other"
+      voice_call_outcome:
+        | "available"
+        | "unavailable"
+        | "callback"
+        | "no_answer"
+        | "voicemail"
+      voice_call_status: "queued" | "in_progress" | "completed" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -920,6 +1105,7 @@ export const Constants = {
       invoice_status: ["draft", "sent", "paid", "overdue", "void"],
       payout_status: ["scheduled", "in_transit", "paid", "failed"],
       recipient_kind: ["venue", "pro", "business"],
+      review_subject: ["venue", "vendor"],
       task_status: ["todo", "in_progress", "done", "blocked"],
       transaction_kind: [
         "charge",
@@ -940,6 +1126,14 @@ export const Constants = {
         "florist",
         "other",
       ],
+      voice_call_outcome: [
+        "available",
+        "unavailable",
+        "callback",
+        "no_answer",
+        "voicemail",
+      ],
+      voice_call_status: ["queued", "in_progress", "completed", "failed"],
     },
   },
 } as const
