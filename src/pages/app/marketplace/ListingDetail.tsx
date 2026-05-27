@@ -198,7 +198,6 @@ export default function ListingDetail() {
                   <div className="mt-1 font-display text-xl font-semibold">{city ?? "—"}</div>
                 </BentoCard>
               </div>
-              </div>
 
               {id && <ReviewsSection kind={kind} subjectId={id} />}
             </div>
