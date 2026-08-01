@@ -1,95 +1,89 @@
+## Deliverable
 
-The user wants the public homepage (`/`, `src/pages/Index.tsx`) redesigned in a "new-age" style inspired by Uber, Airbnb, and top travel apps — and the onboarding flow tightened so a brand-new visitor lands → signs up → picks a role → creates their first event without friction.
+A single committed document, `PRD.md`, at the repo root — long-form, not a summary. No code, schema, or UI changes in this phase.
 
-Let me inspect the current state quickly to ground the plan.
-<lov-tool-use id="toolu_vrtx_01AxeDXBMRnD3JY7RCoS4XNj" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/Index.tsx\"}">
-</lov-tool-use>
+---
 
-<lov-tool-use id="toolu_vrtx_01KAo9Xo3yN9DsL7RWrxhPYG" name="code--view" integration-id="code" data="{\"file_path\": \"src/components/SiteHeader.tsx\"}">
-</lov-tool-use>
+## PRD.md — full outline
 
-<lov-tool-use id="toolu_vrtx_01VbHbvzJBsFeYJM1bDRYD9k" name="code--view" integration-id="code" data="{\"file_path\": \"src/components/SiteFooter.tsx\"}">
-</lov-tool-use>
+### 1. Product definition
+Repositioning from a generic event hub into a **multilingual, accessibility-first community engagement platform for adults 50+**. Core pillars: hyperlocal social connection, AI-assisted participation, senior-grade accessibility, multilingual use, and monetised professional/business tools. Launch market: India. Languages at launch: English, Hindi, Telugu, Urdu, Kannada, Bengali, Marathi, Tamil.
 
-<lov-tool-use id="toolu_vrtx_01RQm235fMRbHg1HYdbJAzbd" name="code--view" integration-id="code" data="{\"file_path\": \"src/contexts/AuthContext.tsx\"}">
-</lov-tool-use>
+Problem statement, target cohorts (active retirees, semi-retired professionals, caregivers, NRI-returnee households, senior-living residents), value proposition per role, success metrics (activation, monthly proposal-to-event conversion, attendance rate vs. votes, repeat participation, professional bookings, sponsor renewals).
 
-<lov-tool-use id="toolu_vrtx_01KVjrDabSHAhQ3SndfuDu2U" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/auth/Auth.tsx\"}">
-</lov-tool-use>
+### 2. Roles and permissions
+Member 50+, Volunteer Host, Professional, Business Sponsor, NGO/Association Admin, Moderator, Operations Admin, Super Admin.
 
-<lov-tool-use id="toolu_vrtx_0164m7DN87FVtV9kWaiT9RXN" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/Index.tsx\"}">
-</lov-tool-use>
+- Per-role: goals, entry path, verification requirements, what they can create/see/monetise.
+- A full **permission matrix**: rows = role, columns = module × action (view/create/edit/moderate/payout/configure).
+- Enforcement model: roles in a dedicated role table (never on the profile), policy-based row access, security-definer role checks, matching route guards, and server-side enforcement for anything financial.
 
-<lov-tool-use id="toolu_vrtx_012W4ghAXKnjcQRkkMFrDYDX" name="code--view" integration-id="code" data="{\"file_path\": \"src/components/SiteHeader.tsx\"}">
-</lov-tool-use>
+### 3. Member experience (detailed flows)
+- **Onboarding**: age gate, location capture (radius bands from 1 mile outward), language selection, accessibility preferences (text scale, contrast, voice-first), interest picker, organisation/NGO discovery, optional caregiver contact.
+- **Senior dashboard**: nearby circles, live proposals to vote on, upcoming activities, reminders, one-tap "join" and "call me" actions.
+- **AI monthly activity ideas** and the voting surface.
+- **Circles & clubs**: creation, membership, host handoff, recurring meetups.
+- **Event discovery**: internal activities plus ingested external listings.
+- **Senior perks**: discounts and offers from businesses.
+- **Memorabilia marketplace**: member-to-member and curated listings.
+- **Multilingual AI companion**: chat + voice, answers in the member's language, can read the screen aloud, can draft an RSVP or a message.
+- **Fact-check & safety**: scam/misinformation checks on shared content.
+- **Referrals** and family invites.
 
-<lov-tool-use id="toolu_vrtx_01LKaESoDuqpFDfSF6o9aFRS" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/auth/Auth.tsx\"}">
-</lov-tool-use>
+### 4. AI proposal engine (the core feature)
+- **Inputs**: member density in configurable radius bands starting at 1 mile, declared interests, cohort/age band, language, cultural and festival profile, past attendance and no-show behaviour, nearby organisations and venues, seasonality/weather, host supply, professional supply.
+- **Output**: a monthly slate of proposals per locality, ranked.
+- **Per-proposal attributes**: title, description, minimum attendance, vote threshold, required professionals, venue type, sponsorship eligibility, accessibility suitability, indoor/outdoor, ticketed/free, estimated cost per head, suggested host.
+- **Voting rule**: configurable threshold multiplier over minimum attendance (default 2–3×) to absorb dropouts; admin-tunable per locality.
+- **Lifecycle**: generated → voting open → threshold met → host assigned → venue/professional confirmed → published event → attendance capture → post-event feedback fed back into the engine.
+- **Failure modes**: not enough members, no host, no venue, threshold missed — each with a defined fallback (merge localities, widen radius, defer to next month, convert to online).
 
-<lov-tool-use id="toolu_vrtx_017AUVeckmCsuPZ98h7nFtMw" name="code--view" integration-id="code" data="{\"file_path\": \"src/contexts/AuthContext.tsx\"}">
-</lov-tool-use>
+### 5. AI provider architecture
+Provider-abstraction layer with per-feature routing and failover.
+- **Lovable AI is the working default** for reasoning, chat, classification, image description, summarisation, and proposal generation.
+- **Sarvam AI is specified as the pluggable slot** for Indian-language translation, speech-to-text, and text-to-speech; Google/Azure documented as fallbacks.
+- A **feature → provider → fallback** mapping table, with per-feature latency/cost/quality notes.
+- Rules: all keys server-side, all provider calls proxied through server functions, per-provider health checks, graceful degradation, usage metering per organisation.
 
-<lov-tool-use id="toolu_vrtx_01KYrW9M4KuuBNGPuKhHwuuG" name="code--view" integration-id="code" data="{\"file_path\": \"src/App.tsx\"}">
-</lov-tool-use>
+### 6. Admin console — all twelve panels
+Dashboard, User Management, Role & Permission Management, Module Toggles, AI & API Settings, Localization, Organizations & NGOs, Professional Services, Sponsors & Advertising, Events & Proposal Engine, Finance, Trust & Safety.
 
-<lov-tool-use id="toolu_vrtx_01U7aEBvwaXpNaeygqYEvTRS" name="code--view" integration-id="code" data="{\"file_path\": \"src/components/events/EventBriefForm.tsx\"}">
-</lov-tool-use>
-<lov-plan>
-## Goal
-Redesign the public homepage and onboarding-to-first-event flow into a single, intuitive, modern experience inspired by Airbnb/Uber/top travel apps. End state: a visitor lands, sees an immersive hero with a one-line "tell us your event" search, signs up in one tap, picks a role inline, and lands on their first auto-drafted event in under 60 seconds.
+Each panel documented with: purpose, primary screens, key controls, the config keys it writes, and which roles can access it.
 
-## Inspiration applied
-- **Airbnb**: large editorial hero, bento category grid, sticky search pill that morphs on scroll, soft shadows, generous whitespace.
-- **Uber**: big input-led CTA "where to" pattern → here it's "What are you planning?" with one prominent field and chip suggestions.
-- **Linear/Arc/travel apps**: glass nav, gradient orbs, animated value props, micro-interactions, social proof strip.
+### 7. Configuration model
+Runtime config domains so admin changes take effect without a redeploy: `app_settings`, `feature_flags`, `ai_provider_settings`, `localization_settings`, `commission_rules`, `event_generation_rules`, `sponsorship_packages`, `role_permissions`, `content_moderation_settings`. For each: shape, who can edit, audit behaviour, and cache/invalidation expectations.
 
-## What changes
+### 8. Rename-in-place mapping
+We keep the existing structure and extend it. The PRD documents the explicit old→new mapping so nothing is rebuilt unnecessarily:
 
-### 1. New public landing (`src/pages/Index.tsx`)
-- **Sticky glass header** (`SiteHeader.tsx`): logo, slim nav (Explore · For pros · Pricing), and a morphing "Plan an event" pill that appears after scrolling past the hero.
-- **Hero (full-bleed)**: ambient gradient mesh + soft animated orbs (bento system) over a muted photo. Headline "Plan any event in 60 seconds." Subhead. One large pill input: "What are you planning?" with auto-suggest chips (Birthday · Wedding · Corporate offsite · Dinner party · Conference). CTA `Start planning` opens the inline brief sheet.
-- **Inline brief sheet** (new, replaces clunky QuickCreateForm card on hero): 3-tap flow — type → guests slider → date+city → `See matches`. If signed out, opens auth sheet inline (no redirect break).
-- **Trust strip**: logos / stats row ("10k pros · 6 cities · Verified & insured").
-- **Bento "How it works"**: 3 large bento cards (Tell us → We match → You book) with gradient orbs, hover lift, microcopy.
-- **Category bento**: 6-tile asymmetric grid (Venues, Chefs, Artists, Photographers, DJs, Planners) with gradient covers, replacing today's 3 plain cards.
-- **For Pros / For Businesses** dual CTA section.
-- **Testimonial carousel** (3 quotes, real-feeling).
-- **Final CTA band** with gradient sunset.
-- New `SiteFooter` polish (mini sitemap + socials).
+```text
+events        -> activities, circles, proposals, voting, hosted events
+marketplace   -> senior perks, memorabilia, professional services
+crm           -> organizations, sponsors, businesses, professionals, outreach
+finance       -> ticketing, sponsorships, organizer billing, commissions, payouts
+trust         -> moderation, fact-check, verification, abuse handling
+settings      -> accessibility, language, AI prefs, notifications, privacy
+home          -> senior dashboard: nearby circles, proposals, reminders
+```
 
-### 2. Streamlined onboarding → first event
-Today: signup → `/onboarding` (role pick) → `/app` → user must navigate to Events → New. Too many steps.
+Plus a table-level view: which current tables are reused as-is, which gain columns, and which are net-new — `circles`, `generated_activity_proposals`, `proposal_votes`, `organizations`, `professionals`, `perks_offers`, `ai_provider_configs`, `feature_toggle_overrides`, `moderation_cases`, and the remaining listed entities. Existing seeded venue/vendor data stays valid.
 
-New flow:
-- **Auth as a sheet/modal** triggered from hero (not a separate page navigation when possible). Keep `/auth` as fallback.
-- After signup (`Auth.tsx` / hero brief sheet), if the user filled the hero brief, **persist it to sessionStorage** as `pendingBrief`.
-- **Onboarding (`Onboarding.tsx`)** redesigned to a single screen with 2 micro-steps:
-  1. **Role pick** — same 3 cards but visually upgraded (bento glass, animated check).
-  2. **Confirm + create first event** — shows the pendingBrief prefilled in a compact card with `Create my event` primary CTA. If no pendingBrief, shows a tiny "Name your first event" mini-form.
-- On submit: writes roles + profile + creates the event in one go, then routes straight to `/app/events/:id` (not `/app`). User lands on their first event with the brief already populated and a clear "Generate plan" CTA → instant aha moment.
-- For users who skip the brief on the homepage, onboarding still ends on event detail (with a freshly-created draft event) so the next step is always obvious.
+### 9. API groups
+Auth, Profile, AI, Event Engine, Voting, Event, Organization, Professional, Sponsor, Marketplace, Admin Config, Audit. Each with responsibilities, key operations, auth requirements, and the rule that every third-party call is proxied server-side.
 
-### 3. Files to touch
-- Edit: `src/pages/Index.tsx`, `src/components/SiteHeader.tsx`, `src/components/SiteFooter.tsx`, `src/components/QuickCreateForm.tsx` (refactor into `HeroBriefSheet`), `src/pages/auth/Auth.tsx` (visual polish + accept `?next=` and `pendingBrief` handoff), `src/pages/auth/Onboarding.tsx` (2-step + auto-create event), `src/index.css` (add a couple of hero-specific utilities if needed).
-- Create: `src/components/landing/HeroBriefSheet.tsx`, `src/components/landing/HowItWorks.tsx`, `src/components/landing/CategoryBento.tsx`, `src/components/landing/Testimonials.tsx`, `src/components/landing/TrustStrip.tsx`, `src/components/landing/FinalCta.tsx`, `src/lib/pendingBrief.ts` (sessionStorage helpers + types).
-- Reuse: existing `createEvent` service, bento primitives, `EVENT_TYPES`, `Slider`, `Calendar`.
+### 10. Delivery phases
+Six phases — foundation; onboarding + localization; proposal engine; professionals + sponsors; trust + assistant; external ingestion — each with scope, exit criteria, and dependencies.
 
-### 4. Design system specifics
-- Reuse Bento + Glass tokens already shipped (sunset/aurora/ocean/mint, glass blur, gradient orbs, fade-up animation).
-- Hero typography: `font-display` 5xl–7xl, tight tracking, gradient text on key word.
-- Pill input: 64px tall, rounded-full, glass background, focus ring in primary.
-- Motion: `animate-fade-up` staggered on hero, `orb-drift` on background orbs, hover-lift on bento tiles.
-- Mobile-first: hero stacks; brief sheet becomes a bottom drawer on `<sm`.
+### 11. Non-functional requirements
+Accessibility targets (scalable text, high contrast, voice-first paths, large tap targets, screen-reader semantics), performance budgets on low-end Android, offline/poor-network tolerance, moderation SLAs, data privacy for a senior cohort, consent and disclosure for AI voice, and audit logging.
 
-### 5. Acceptance criteria
-- Homepage feels editorial and modern; no plain card grid above the fold.
-- New visitor can go from landing → typed brief → signed up → role picked → first event created in ≤60 seconds and ≤4 taps.
-- All copy uses sentence case + verb-led CTAs ("Start planning", "Create my event", "See matches").
-- Works at 375px, 994px (current viewport), and 1440px.
-- Light/dark both render cleanly; tabular numerals on guest count.
-- No regressions to existing `/app` shell.
+### 12. Open questions
+Monetisation splits, background-verification vendor for professionals, external event sources, and age-verification method — flagged for decision before Phase 1 build.
 
-### 6. Out of scope (this pass)
-- Real auto-suggest backend (chips are static).
-- Social/Google auth (mentioned earlier but not added unless asked).
-- Pricing / For pros / How-it-works full pages — only landing sections.
+---
+
+## Technical notes
+Written for both product and engineering readers. Schema and RBAC stay at entity/field-intent level rather than full DDL; a separate schema spec can follow once the PRD is approved.
+
+## Out of scope for this phase
+No migrations, no route changes, no Sarvam integration, no admin UI — those begin after sign-off.
