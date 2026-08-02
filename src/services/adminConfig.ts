@@ -84,5 +84,5 @@ export const recordAudit = async (entry: {
   reason?: string;
   after_value?: Record<string, unknown>;
 }) => {
-  await supabase.from("admin_audit_log").insert(entry);
+  await supabase.from("admin_audit_log").insert([entry]);
 };
