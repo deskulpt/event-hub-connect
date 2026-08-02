@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { translate, RTL_LANGUAGES, type LanguageCode } from "@/lib/i18n";
 import type { AccessibilityPrefs } from "@/types/community";
@@ -71,7 +72,7 @@ export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
   }, [language, accessibility]);
 
   const persist = useCallback(
-    async (patch: Record<string, unknown>) => {
+    async (patch: TablesUpdate<"profiles">) => {
       if (!user) return;
       await supabase.from("profiles").update(patch).eq("id", user.id);
       await refreshProfile();
