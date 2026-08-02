@@ -82,7 +82,7 @@ export const recordAudit = async (entry: {
   action: string;
   target_id?: string;
   reason?: string;
-  after_value?: Record<string, unknown>;
+  after_value?: Record<string, string | number | boolean | null>;
 }) => {
   await supabase.from("admin_audit_log").insert([entry]);
 };
