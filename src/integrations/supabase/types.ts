@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_value: Json | null
+          before_value: Json | null
+          created_at: string
+          domain: string
+          id: string
+          reason: string | null
+          target_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          domain: string
+          id?: string
+          reason?: string | null
+          target_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          domain?: string
+          id?: string
+          reason?: string | null
+          target_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_provider_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          fallback_model: string | null
+          fallback_provider: string | null
+          feature: string
+          id: string
+          monthly_spend_cap_cents: number | null
+          notes: string | null
+          primary_model: string
+          primary_provider: string
+          rate_limit_per_min: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          fallback_model?: string | null
+          fallback_provider?: string | null
+          feature: string
+          id?: string
+          monthly_spend_cap_cents?: number | null
+          notes?: string | null
+          primary_model?: string
+          primary_provider?: string
+          rate_limit_per_min?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          fallback_model?: string | null
+          fallback_provider?: string | null
+          feature?: string
+          id?: string
+          monthly_spend_cap_cents?: number | null
+          notes?: string | null
+          primary_model?: string
+          primary_provider?: string
+          rate_limit_per_min?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           created_at: string
@@ -80,6 +188,130 @@ export type Database = {
           },
         ]
       }
+      circle_members: {
+        Row: {
+          circle_id: string
+          created_at: string
+          id: string
+          is_organizer: boolean
+          user_id: string
+        }
+        Insert: {
+          circle_id: string
+          created_at?: string
+          id?: string
+          is_organizer?: boolean
+          user_id: string
+        }
+        Update: {
+          circle_id?: string
+          created_at?: string
+          id?: string
+          is_organizer?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circle_members_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      circles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          interest_tags: string[]
+          language: string
+          locality_id: string | null
+          member_count: number
+          name: string
+          organization_id: string | null
+          owner_id: string
+          photo_url: string | null
+          published: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          interest_tags?: string[]
+          language?: string
+          locality_id?: string | null
+          member_count?: number
+          name: string
+          organization_id?: string | null
+          owner_id: string
+          photo_url?: string | null
+          published?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          interest_tags?: string[]
+          language?: string
+          locality_id?: string | null
+          member_count?: number
+          name?: string
+          organization_id?: string | null
+          owner_id?: string
+          photo_url?: string | null
+          published?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circles_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_rules: {
+        Row: {
+          cap_cents: number | null
+          category: string
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          effective_to: string | null
+          floor_cents: number
+          id: string
+          rate_percent: number
+        }
+        Insert: {
+          cap_cents?: number | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          floor_cents?: number
+          id?: string
+          rate_percent?: number
+        }
+        Update: {
+          cap_cents?: number | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          floor_cents?: number
+          id?: string
+          rate_percent?: number
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           company: string | null
@@ -118,6 +350,131 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      content_moderation_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      content_reports: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision: string | null
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          status: Database["public"]["Enums"]["report_status"]
+          subject_id: string
+          subject_table: string
+          triage_confidence: number | null
+          triage_label: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: Database["public"]["Enums"]["report_status"]
+          subject_id: string
+          subject_table: string
+          triage_confidence?: number | null
+          triage_label?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: Database["public"]["Enums"]["report_status"]
+          subject_id?: string
+          subject_table?: string
+          triage_confidence?: number | null
+          triage_label?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      event_generation_rules: {
+        Row: {
+          auto_publish: boolean
+          created_at: string
+          enabled: boolean
+          id: string
+          locality_id: string | null
+          min_threshold: number
+          radius_bands: number[]
+          slate_size: number
+          threshold_multiplier: number
+          updated_at: string
+          voting_window_days: number
+        }
+        Insert: {
+          auto_publish?: boolean
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          locality_id?: string | null
+          min_threshold?: number
+          radius_bands?: number[]
+          slate_size?: number
+          threshold_multiplier?: number
+          updated_at?: string
+          voting_window_days?: number
+        }
+        Update: {
+          auto_publish?: boolean
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          locality_id?: string | null
+          min_threshold?: number
+          radius_bands?: number[]
+          slate_size?: number
+          threshold_multiplier?: number
+          updated_at?: string
+          voting_window_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_generation_rules_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: true
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_invites: {
         Row: {
@@ -202,54 +559,256 @@ export type Database = {
       }
       events: {
         Row: {
+          accessibility_attributes: string[]
           accessibility_notes: string | null
           budget_cents: number | null
+          circle_id: string | null
           city: string | null
           created_at: string
           dietary_notes: string | null
           event_date: string | null
           event_type: string | null
+          external_source: string | null
           guest_count: number | null
           id: string
+          indoor_outdoor: string | null
+          language: string
+          locality_id: string | null
+          min_attendance: number | null
+          organization_id: string | null
+          origin: string
           owner_id: string
+          proposal_id: string | null
           status: Database["public"]["Enums"]["event_status"]
           title: string
           updated_at: string
           vibe: string | null
         }
         Insert: {
+          accessibility_attributes?: string[]
           accessibility_notes?: string | null
           budget_cents?: number | null
+          circle_id?: string | null
           city?: string | null
           created_at?: string
           dietary_notes?: string | null
           event_date?: string | null
           event_type?: string | null
+          external_source?: string | null
           guest_count?: number | null
           id?: string
+          indoor_outdoor?: string | null
+          language?: string
+          locality_id?: string | null
+          min_attendance?: number | null
+          organization_id?: string | null
+          origin?: string
           owner_id: string
+          proposal_id?: string | null
           status?: Database["public"]["Enums"]["event_status"]
           title: string
           updated_at?: string
           vibe?: string | null
         }
         Update: {
+          accessibility_attributes?: string[]
           accessibility_notes?: string | null
           budget_cents?: number | null
+          circle_id?: string | null
           city?: string | null
           created_at?: string
           dietary_notes?: string | null
           event_date?: string | null
           event_type?: string | null
+          external_source?: string | null
           guest_count?: number | null
           id?: string
+          indoor_outdoor?: string | null
+          language?: string
+          locality_id?: string | null
+          min_attendance?: number | null
+          organization_id?: string | null
+          origin?: string
           owner_id?: string
+          proposal_id?: string | null
           status?: Database["public"]["Enums"]["event_status"]
           title?: string
           updated_at?: string
           vibe?: string | null
         }
         Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled: boolean
+          key: string
+          label: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          key: string
+          label?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          key?: string
+          label?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feature_toggle_overrides: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          flag_key: string
+          id: string
+          scope_id: string | null
+          scope_kind: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled: boolean
+          flag_key: string
+          id?: string
+          scope_id?: string | null
+          scope_kind: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          flag_key?: string
+          id?: string
+          scope_id?: string | null
+          scope_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_toggle_overrides_flag_key_fkey"
+            columns: ["flag_key"]
+            isOneToOne: false
+            referencedRelation: "feature_flags"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      generated_activity_proposals: {
+        Row: {
+          accessibility_attributes: string[]
+          category: string | null
+          circle_id: string | null
+          claimed_by: string | null
+          created_at: string
+          estimated_cost_cents: number
+          event_id: string | null
+          id: string
+          indoor_outdoor: string | null
+          language: string
+          locality_id: string | null
+          rationale: string | null
+          run_id: string | null
+          status: Database["public"]["Enums"]["proposal_status"]
+          suggested_date: string | null
+          suggested_time: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+          vote_count: number
+          vote_threshold: number
+          voting_closes_on: string | null
+          voting_opens_on: string | null
+        }
+        Insert: {
+          accessibility_attributes?: string[]
+          category?: string | null
+          circle_id?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          estimated_cost_cents?: number
+          event_id?: string | null
+          id?: string
+          indoor_outdoor?: string | null
+          language?: string
+          locality_id?: string | null
+          rationale?: string | null
+          run_id?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"]
+          suggested_date?: string | null
+          suggested_time?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          vote_count?: number
+          vote_threshold?: number
+          voting_closes_on?: string | null
+          voting_opens_on?: string | null
+        }
+        Update: {
+          accessibility_attributes?: string[]
+          category?: string | null
+          circle_id?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          estimated_cost_cents?: number
+          event_id?: string | null
+          id?: string
+          indoor_outdoor?: string | null
+          language?: string
+          locality_id?: string | null
+          rationale?: string | null
+          run_id?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"]
+          suggested_date?: string | null
+          suggested_time?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          vote_count?: number
+          vote_threshold?: number
+          voting_closes_on?: string | null
+          voting_opens_on?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_activity_proposals_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_activity_proposals_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_activity_proposals_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_activity_proposals_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_generation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inquiries: {
         Row: {
@@ -397,6 +956,143 @@ export type Database = {
           },
         ]
       }
+      localities: {
+        Row: {
+          active: boolean
+          center_lat: number | null
+          center_lng: number | null
+          city: string | null
+          country: string
+          created_at: string
+          default_language: string
+          id: string
+          member_count: number
+          name: string
+          radius_miles: number
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          center_lat?: number | null
+          center_lng?: number | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          default_language?: string
+          id?: string
+          member_count?: number
+          name: string
+          radius_miles?: number
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          center_lat?: number | null
+          center_lng?: number | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          default_language?: string
+          id?: string
+          member_count?: number
+          name?: string
+          radius_miles?: number
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      localization_settings: {
+        Row: {
+          coverage_percent: number
+          created_at: string
+          enabled: boolean
+          id: string
+          is_default: boolean
+          label: string
+          language_code: string
+          native_label: string | null
+          updated_at: string
+        }
+        Insert: {
+          coverage_percent?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          is_default?: boolean
+          label: string
+          language_code: string
+          native_label?: string | null
+          updated_at?: string
+        }
+        Update: {
+          coverage_percent?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          is_default?: boolean
+          label?: string
+          language_code?: string
+          native_label?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      memorabilia_listings: {
+        Row: {
+          category: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          image_url: string | null
+          locality_id: string | null
+          owner_id: string
+          price_cents: number
+          status: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          locality_id?: string | null
+          owner_id: string
+          price_cents?: number
+          status?: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          locality_id?: string | null
+          owner_id?: string
+          price_cents?: number
+          status?: Database["public"]["Enums"]["listing_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorabilia_listings_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
@@ -425,6 +1121,100 @@ export type Database = {
             columns: ["inquiry_id"]
             isOneToOne: false
             referencedRelation: "inquiries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          org_role: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_role?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_role?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          city: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kind: string
+          locality_id: string | null
+          logo_url: string | null
+          name: string
+          owner_id: string
+          registration_number: string | null
+          status: Database["public"]["Enums"]["org_status"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: string
+          locality_id?: string | null
+          logo_url?: string | null
+          name: string
+          owner_id: string
+          registration_number?: string | null
+          status?: Database["public"]["Enums"]["org_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: string
+          locality_id?: string | null
+          logo_url?: string | null
+          name?: string
+          owner_id?: string
+          registration_number?: string | null
+          status?: Database["public"]["Enums"]["org_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
             referencedColumns: ["id"]
           },
         ]
@@ -474,38 +1264,295 @@ export type Database = {
         }
         Relationships: []
       }
+      perk_redemptions: {
+        Row: {
+          id: string
+          perk_id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          perk_id: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          perk_id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perk_redemptions_perk_id_fkey"
+            columns: ["perk_id"]
+            isOneToOne: false
+            referencedRelation: "perks_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perks_offers: {
+        Row: {
+          category: string | null
+          code: string | null
+          created_at: string
+          description: string | null
+          discount_label: string | null
+          ends_on: string | null
+          id: string
+          image_url: string | null
+          locality_id: string | null
+          max_redemptions: number | null
+          organization_id: string | null
+          owner_id: string
+          redemption_count: number
+          starts_on: string | null
+          status: Database["public"]["Enums"]["perk_status"]
+          terms: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          discount_label?: string | null
+          ends_on?: string | null
+          id?: string
+          image_url?: string | null
+          locality_id?: string | null
+          max_redemptions?: number | null
+          organization_id?: string | null
+          owner_id: string
+          redemption_count?: number
+          starts_on?: string | null
+          status?: Database["public"]["Enums"]["perk_status"]
+          terms?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          discount_label?: string | null
+          ends_on?: string | null
+          id?: string
+          image_url?: string | null
+          locality_id?: string | null
+          max_redemptions?: number | null
+          organization_id?: string | null
+          owner_id?: string
+          redemption_count?: number
+          starts_on?: string | null
+          status?: Database["public"]["Enums"]["perk_status"]
+          terms?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perks_offers_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "perks_offers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_credentials: {
+        Row: {
+          created_at: string
+          document_url: string | null
+          expires_on: string | null
+          id: string
+          issued_on: string | null
+          kind: string
+          owner_id: string
+          reviewer_note: string | null
+          state: Database["public"]["Enums"]["verification_state"]
+          title: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_url?: string | null
+          expires_on?: string | null
+          id?: string
+          issued_on?: string | null
+          kind: string
+          owner_id: string
+          reviewer_note?: string | null
+          state?: Database["public"]["Enums"]["verification_state"]
+          title: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          document_url?: string | null
+          expires_on?: string | null
+          id?: string
+          issued_on?: string | null
+          kind?: string
+          owner_id?: string
+          reviewer_note?: string | null
+          state?: Database["public"]["Enums"]["verification_state"]
+          title?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_credentials_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          accessibility_prefs: Json
           active_role: Database["public"]["Enums"]["app_role"]
+          age_band: string | null
           avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          interests: string[]
+          latitude: number | null
+          locality_id: string | null
+          longitude: number | null
           onboarded: boolean
+          preferred_language: string
           updated_at: string
+          voice_first_enabled: boolean
         }
         Insert: {
+          accessibility_prefs?: Json
           active_role?: Database["public"]["Enums"]["app_role"]
+          age_band?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          interests?: string[]
+          latitude?: number | null
+          locality_id?: string | null
+          longitude?: number | null
           onboarded?: boolean
+          preferred_language?: string
           updated_at?: string
+          voice_first_enabled?: boolean
         }
         Update: {
+          accessibility_prefs?: Json
           active_role?: Database["public"]["Enums"]["app_role"]
+          age_band?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          interests?: string[]
+          latitude?: number | null
+          locality_id?: string | null
+          longitude?: number | null
           onboarded?: boolean
+          preferred_language?: string
           updated_at?: string
+          voice_first_enabled?: boolean
         }
         Relationships: []
+      }
+      proposal_generation_runs: {
+        Row: {
+          created_at: string
+          diagnostics: Json
+          id: string
+          locality_id: string | null
+          model: string | null
+          period: string
+          proposals_created: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          diagnostics?: Json
+          id?: string
+          locality_id?: string | null
+          model?: string | null
+          period: string
+          proposals_created?: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          diagnostics?: Json
+          id?: string
+          locality_id?: string | null
+          model?: string | null
+          period?: string
+          proposals_created?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_generation_runs_locality_id_fkey"
+            columns: ["locality_id"]
+            isOneToOne: false
+            referencedRelation: "localities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_votes: {
+        Row: {
+          created_at: string
+          id: string
+          proposal_id: string
+          user_id: string
+          vote: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          proposal_id: string
+          user_id: string
+          vote?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          user_id?: string
+          vote?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "generated_activity_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       receipts: {
         Row: {
@@ -620,6 +1667,45 @@ export type Database = {
           listing_id?: string
           listing_kind?: Database["public"]["Enums"]["recipient_kind"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      sponsorship_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          description: string | null
+          duration_days: number
+          id: string
+          name: string
+          placements: string[]
+          price_cents: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          name: string
+          placements?: string[]
+          price_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          name?: string
+          placements?: string[]
+          price_cents?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -763,51 +1849,67 @@ export type Database = {
       }
       vendors: {
         Row: {
+          background_check_state: Database["public"]["Enums"]["verification_state"]
           base_price_cents: number | null
           category: Database["public"]["Enums"]["vendor_category"]
           city: string | null
           created_at: string
           description: string | null
           id: string
+          languages_spoken: string[]
+          locality_id: string | null
           name: string
           owner_id: string
           photo_url: string | null
           published: boolean
+          rate_card: Json
           updated_at: string
+          verification_state: Database["public"]["Enums"]["verification_state"]
           vibe_tags: string[] | null
         }
         Insert: {
+          background_check_state?: Database["public"]["Enums"]["verification_state"]
           base_price_cents?: number | null
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          languages_spoken?: string[]
+          locality_id?: string | null
           name: string
           owner_id: string
           photo_url?: string | null
           published?: boolean
+          rate_card?: Json
           updated_at?: string
+          verification_state?: Database["public"]["Enums"]["verification_state"]
           vibe_tags?: string[] | null
         }
         Update: {
+          background_check_state?: Database["public"]["Enums"]["verification_state"]
           base_price_cents?: number | null
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          languages_spoken?: string[]
+          locality_id?: string | null
           name?: string
           owner_id?: string
           photo_url?: string | null
           published?: boolean
+          rate_card?: Json
           updated_at?: string
+          verification_state?: Database["public"]["Enums"]["verification_state"]
           vibe_tags?: string[] | null
         }
         Relationships: []
       }
       venues: {
         Row: {
+          accessibility_attributes: string[]
           base_price_cents: number | null
           capacity_max: number | null
           capacity_min: number | null
@@ -815,7 +1917,9 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          locality_id: string | null
           name: string
+          organization_id: string | null
           owner_id: string
           photo_url: string | null
           published: boolean
@@ -823,6 +1927,7 @@ export type Database = {
           vibe_tags: string[] | null
         }
         Insert: {
+          accessibility_attributes?: string[]
           base_price_cents?: number | null
           capacity_max?: number | null
           capacity_min?: number | null
@@ -830,7 +1935,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          locality_id?: string | null
           name: string
+          organization_id?: string | null
           owner_id: string
           photo_url?: string | null
           published?: boolean
@@ -838,6 +1945,7 @@ export type Database = {
           vibe_tags?: string[] | null
         }
         Update: {
+          accessibility_attributes?: string[]
           base_price_cents?: number | null
           capacity_max?: number | null
           capacity_min?: number | null
@@ -845,7 +1953,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          locality_id?: string | null
           name?: string
+          organization_id?: string | null
           owner_id?: string
           photo_url?: string | null
           published?: boolean
@@ -923,9 +2033,23 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_moderator: { Args: { _user_id: string }; Returns: boolean }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "host" | "pro" | "business" | "admin"
+      app_role:
+        | "host"
+        | "pro"
+        | "business"
+        | "admin"
+        | "member"
+        | "volunteer_host"
+        | "professional"
+        | "sponsor"
+        | "org_admin"
+        | "moderator"
+        | "ops_admin"
+        | "super_admin"
       booking_status:
         | "pending"
         | "confirmed"
@@ -936,8 +2060,20 @@ export type Database = {
       event_status: "draft" | "planning" | "booked" | "completed" | "cancelled"
       inquiry_status: "new" | "sent" | "replied" | "declined" | "expired"
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "void"
+      listing_status: "active" | "sold" | "withdrawn" | "removed"
+      org_status: "pending" | "verified" | "suspended" | "rejected"
       payout_status: "scheduled" | "in_transit" | "paid" | "failed"
+      perk_status: "draft" | "pending" | "approved" | "paused" | "expired"
+      proposal_status:
+        | "draft"
+        | "voting"
+        | "threshold_met"
+        | "scheduled"
+        | "published"
+        | "expired"
+        | "rejected"
       recipient_kind: "venue" | "pro" | "business"
+      report_status: "open" | "triaged" | "actioned" | "dismissed"
       review_subject: "venue" | "vendor"
       task_status: "todo" | "in_progress" | "done" | "blocked"
       transaction_kind:
@@ -957,6 +2093,7 @@ export type Database = {
         | "caterer"
         | "florist"
         | "other"
+      verification_state: "unverified" | "pending" | "verified" | "rejected"
       voice_call_outcome:
         | "available"
         | "unavailable"
@@ -1091,7 +2228,20 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["host", "pro", "business", "admin"],
+      app_role: [
+        "host",
+        "pro",
+        "business",
+        "admin",
+        "member",
+        "volunteer_host",
+        "professional",
+        "sponsor",
+        "org_admin",
+        "moderator",
+        "ops_admin",
+        "super_admin",
+      ],
       booking_status: [
         "pending",
         "confirmed",
@@ -1103,8 +2253,21 @@ export const Constants = {
       event_status: ["draft", "planning", "booked", "completed", "cancelled"],
       inquiry_status: ["new", "sent", "replied", "declined", "expired"],
       invoice_status: ["draft", "sent", "paid", "overdue", "void"],
+      listing_status: ["active", "sold", "withdrawn", "removed"],
+      org_status: ["pending", "verified", "suspended", "rejected"],
       payout_status: ["scheduled", "in_transit", "paid", "failed"],
+      perk_status: ["draft", "pending", "approved", "paused", "expired"],
+      proposal_status: [
+        "draft",
+        "voting",
+        "threshold_met",
+        "scheduled",
+        "published",
+        "expired",
+        "rejected",
+      ],
       recipient_kind: ["venue", "pro", "business"],
+      report_status: ["open", "triaged", "actioned", "dismissed"],
       review_subject: ["venue", "vendor"],
       task_status: ["todo", "in_progress", "done", "blocked"],
       transaction_kind: [
@@ -1126,6 +2289,7 @@ export const Constants = {
         "florist",
         "other",
       ],
+      verification_state: ["unverified", "pending", "verified", "rejected"],
       voice_call_outcome: [
         "available",
         "unavailable",
