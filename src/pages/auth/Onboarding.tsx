@@ -42,11 +42,11 @@ export default function Onboarding() {
     if (!user) return;
     setLoading(true);
     try {
-      const rows = selected.map((role) => ({ user_id: user.id, role }));
-      const { error: rolesErr } = await supabase
-        .from("user_roles")
-        .upsert(rows, { onConflict: "user_id,role" });
-      if (rolesErr) throw rolesErr;
+      for (const role of selected) {
+        const { error: rolesErr } = await supabase.rpc("claim_self_service_role", { _role: role });
+        if (rolesErr) throw rolesErr;
+      }
+
 
       const { error: profErr } = await supabase
         .from("profiles")
