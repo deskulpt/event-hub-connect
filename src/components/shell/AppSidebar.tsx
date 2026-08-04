@@ -1,6 +1,6 @@
 import {
-  Home, CalendarDays, Store, Users, Calendar, Wallet, ShieldCheck, Inbox, BarChart3, Settings,
-  Heart, Bookmark, MessageSquare, ClipboardList, Sparkles,
+  Home, CalendarDays, Users, Calendar, Wallet, ShieldCheck, Inbox, BarChart3, Settings,
+  Bookmark, MessageSquare, ClipboardList, Sparkles, Gift, Vote, Building2, Store, SlidersHorizontal,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -15,60 +15,76 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useActiveRole } from "@/hooks/useActiveRole";
-import type { AppRole } from "@/contexts/AuthContext";
+import { useAuth, MODERATOR_ROLES, type AppRole } from "@/contexts/AuthContext";
 
 type NavItem = { title: string; url: string; icon: typeof Home; end?: boolean };
 
-const navByRole: Record<AppRole, NavItem[]> = {
-  host: [
-    { title: "Home", url: "/app", icon: Home, end: true },
-    { title: "My Events", url: "/app/events", icon: CalendarDays },
-    { title: "Discover", url: "/app/marketplace", icon: Store, end: true },
-    { title: "Shortlist", url: "/app/marketplace/saved", icon: Heart },
-    { title: "Calendar", url: "/app/calendar", icon: Calendar },
-    { title: "Budget & Finance", url: "/app/finance", icon: Wallet },
-    { title: "Inbox", url: "/app/inbox", icon: Inbox },
-    { title: "Trust", url: "/app/trust", icon: ShieldCheck },
-    { title: "Settings", url: "/app/settings", icon: Settings },
-  ],
-  pro: [
-    { title: "Home", url: "/app", icon: Home, end: true },
-    { title: "Leads", url: "/app/crm/inquiries", icon: MessageSquare },
-    { title: "Bookings", url: "/app/crm/bookings", icon: Bookmark },
-    { title: "Calendar", url: "/app/calendar", icon: Calendar },
-    { title: "Clients", url: "/app/crm/contacts", icon: Users },
-    { title: "Earnings", url: "/app/finance/overview", icon: Wallet },
-    { title: "Trust & Insurance", url: "/app/trust", icon: ShieldCheck },
-    { title: "Inbox", url: "/app/inbox", icon: Inbox },
-    { title: "Settings", url: "/app/settings", icon: Settings },
-  ],
-  business: [
-    { title: "Home", url: "/app", icon: Home, end: true },
-    { title: "Bookings", url: "/app/crm/bookings", icon: Bookmark },
-    { title: "Operations", url: "/app/crm/tasks", icon: ClipboardList },
-    { title: "Calendar", url: "/app/calendar", icon: Calendar },
-    { title: "CRM", url: "/app/crm", icon: Users },
-    { title: "Finance", url: "/app/finance", icon: Wallet },
-    { title: "Trust & Compliance", url: "/app/trust", icon: ShieldCheck },
-    { title: "Insights", url: "/app/insights", icon: BarChart3 },
-    { title: "Inbox", url: "/app/inbox", icon: Inbox },
-    { title: "Settings", url: "/app/settings", icon: Settings },
-  ],
-  admin: [
-    { title: "Home", url: "/app", icon: Home, end: true },
-    { title: "Trust", url: "/app/trust", icon: ShieldCheck },
-    { title: "Finance", url: "/app/finance", icon: Wallet },
-    { title: "Insights", url: "/app/insights", icon: BarChart3 },
-    { title: "Inbox", url: "/app/inbox", icon: Inbox },
-    { title: "Settings", url: "/app/settings", icon: Settings },
-  ],
+const communityNav: NavItem[] = [
+  { title: "Home", url: "/app", icon: Home, end: true },
+  { title: "Activities", url: "/app/events", icon: CalendarDays },
+  { title: "Proposals", url: "/app/proposals", icon: Vote },
+  { title: "Circles", url: "/app/circles", icon: Users },
+  { title: "Perks", url: "/app/perks", icon: Gift },
+  { title: "Memorabilia", url: "/app/memorabilia", icon: Store },
+  { title: "Calendar", url: "/app/calendar", icon: Calendar },
+  { title: "Inbox", url: "/app/inbox", icon: Inbox },
+  { title: "Settings", url: "/app/settings", icon: Settings },
+];
+
+const professionalNav: NavItem[] = [
+  { title: "Home", url: "/app", icon: Home, end: true },
+  { title: "Leads", url: "/app/crm/inquiries", icon: MessageSquare },
+  { title: "Bookings", url: "/app/crm/bookings", icon: Bookmark },
+  { title: "Activities", url: "/app/events", icon: CalendarDays },
+  { title: "Calendar", url: "/app/calendar", icon: Calendar },
+  { title: "Perks I offer", url: "/app/perks/manage", icon: Gift },
+  { title: "Billing", url: "/app/finance", icon: Wallet },
+  { title: "Trust", url: "/app/trust", icon: ShieldCheck },
+  { title: "Inbox", url: "/app/inbox", icon: Inbox },
+  { title: "Settings", url: "/app/settings", icon: Settings },
+];
+
+const orgNav: NavItem[] = [
+  { title: "Home", url: "/app", icon: Home, end: true },
+  { title: "Orgs", url: "/app/orgs", icon: Building2 },
+  { title: "Activities", url: "/app/events", icon: CalendarDays },
+  { title: "Circles", url: "/app/circles", icon: Users },
+  { title: "Perks I offer", url: "/app/perks/manage", icon: Gift },
+  { title: "Operations", url: "/app/crm/tasks", icon: ClipboardList },
+  { title: "Billing", url: "/app/finance", icon: Wallet },
+  { title: "Insights", url: "/app/insights", icon: BarChart3 },
+  { title: "Inbox", url: "/app/inbox", icon: Inbox },
+  { title: "Settings", url: "/app/settings", icon: Settings },
+];
+
+const navByRole: Partial<Record<AppRole, NavItem[]>> = {
+  member: communityNav,
+  host: communityNav,
+  volunteer_host: communityNav,
+  pro: professionalNav,
+  professional: professionalNav,
+  sponsor: orgNav,
+  business: orgNav,
+  org_admin: orgNav,
+  moderator: orgNav,
+  admin: orgNav,
+  ops_admin: orgNav,
+  super_admin: orgNav,
 };
 
-const labelByRole: Record<AppRole, string> = {
-  host: "Host workspace",
-  pro: "Pro workspace",
-  business: "Business workspace",
-  admin: "Admin workspace",
+const labelByRole: Partial<Record<AppRole, string>> = {
+  member: "Community",
+  host: "Community",
+  volunteer_host: "Volunteer host",
+  pro: "Professional",
+  professional: "Professional",
+  sponsor: "Sponsor",
+  business: "Business",
+  org_admin: "Organisation",
+  moderator: "Moderation",
+  admin: "Admin",
+  ops_admin: "Admin",
+  super_admin: "Admin",
 };
 
 export const AppSidebar = () => {
@@ -76,7 +92,15 @@ export const AppSidebar = () => {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { activeRole } = useActiveRole();
-  const items = navByRole[activeRole];
+  const { roles } = useAuth();
+  const items = navByRole[activeRole] ?? communityNav;
+  const workspaceLabel = labelByRole[activeRole] ?? "Community";
+  const canModerate = roles.some((role) => MODERATOR_ROLES.includes(role));
+  const navItems = canModerate
+    ? [...items.filter((i) => i.url !== "/app/settings"),
+       { title: "Admin", url: "/app/admin", icon: SlidersHorizontal } as NavItem,
+       { title: "Settings", url: "/app/settings", icon: Settings } as NavItem]
+    : items;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/40">
@@ -89,7 +113,9 @@ export const AppSidebar = () => {
           {!collapsed && (
             <div className="flex flex-col leading-none">
               <span className="font-display text-lg font-semibold tracking-tight text-foreground">Vibely</span>
-              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">{labelByRole[activeRole].split(" ")[0]}</span>
+              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+                {workspaceLabel}
+              </span>
             </div>
           )}
         </div>
@@ -101,7 +127,7 @@ export const AppSidebar = () => {
           )}
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
-              {items.map((item) => {
+              {navItems.map((item) => {
                 const isActive = item.end
                   ? location.pathname === item.url
                   : location.pathname.startsWith(item.url);
@@ -134,7 +160,7 @@ export const AppSidebar = () => {
                 <p className="font-display text-xs font-semibold">Vibely AI</p>
               </div>
               <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                Brief → match → call → confirm. End-to-end automation.
+                Neighbours, ideas, votes — turned into real local activities.
               </p>
             </div>
           </div>

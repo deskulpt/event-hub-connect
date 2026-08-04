@@ -49,6 +49,12 @@ import Inbox from "./pages/app/Inbox";
 import Insights from "./pages/app/Insights";
 import Settings from "./pages/app/settings/Settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Circles } from "./pages/app/circles/Circles";
+import { Proposals } from "./pages/app/proposals/Proposals";
+import { Perks } from "./pages/app/perks/Perks";
+import { ManagePerks } from "./pages/app/perks/ManagePerks";
+import { Memorabilia } from "./pages/app/memorabilia/Memorabilia";
+import { Orgs } from "./pages/app/orgs/Orgs";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +74,12 @@ const App = () => (
 
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<Home />} />
+              <Route path="circles" element={<Circles />} />
+              <Route path="proposals" element={<Proposals />} />
+              <Route path="perks" element={<Perks />} />
+              <Route path="perks/manage" element={<ManagePerks />} />
+              <Route path="memorabilia" element={<Memorabilia />} />
+              <Route path="orgs" element={<Orgs />} />
               <Route path="events" element={<AllEvents />} />
               <Route path="events/new" element={<EventNew />} />
               <Route path="events/:id" element={<EventDetail />} />

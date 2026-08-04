@@ -255,3 +255,27 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
+/* Accessibility preference hooks (set by PreferencesProvider) */
+html.text-scale-large { font-size: 18px; }
+html.text-scale-xlarge { font-size: 20px; }
+
+html.high-contrast {
+  --foreground: 0 0% 4%;
+  --muted-foreground: 0 0% 20%;
+  --border: 0 0% 35%;
+}
+html.high-contrast.dark {
+  --foreground: 0 0% 100%;
+  --muted-foreground: 0 0% 88%;
+  --border: 0 0% 70%;
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

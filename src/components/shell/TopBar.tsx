@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { QuickCreate } from "./QuickCreate";
+import { AccessibilityMenu, LanguageMenu } from "./PreferencesMenu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,12 +19,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useState } from "react";
 import { useActiveRole } from "@/hooks/useActiveRole";
 
-const roleMeta: Record<AppRole, { label: string; icon: typeof PartyPopper }> = {
+const roleMeta: Partial<Record<AppRole, { label: string; icon: typeof PartyPopper }>> = {
   host: { label: "Host", icon: PartyPopper },
+  member: { label: "Member", icon: PartyPopper },
+  volunteer_host: { label: "Volunteer host", icon: PartyPopper },
   pro: { label: "Pro", icon: Briefcase },
+  professional: { label: "Professional", icon: Briefcase },
+  sponsor: { label: "Sponsor", icon: Building2 },
   business: { label: "Business", icon: Building2 },
+  org_admin: { label: "Org admin", icon: Building2 },
+  moderator: { label: "Moderator", icon: Sparkles },
   admin: { label: "Admin", icon: Sparkles },
+  ops_admin: { label: "Ops admin", icon: Sparkles },
+  super_admin: { label: "Super admin", icon: Sparkles },
 };
+
+const metaFor = (role: AppRole) => roleMeta[role] ?? { label: "Member", icon: PartyPopper };
 
 export const TopBar = () => {
   const { profile, signOut } = useAuth();
@@ -31,7 +42,7 @@ export const TopBar = () => {
   const navigate = useNavigate();
   const [aiOpen, setAiOpen] = useState(false);
   const initials = (profile?.full_name || profile?.email || "U").slice(0, 2).toUpperCase();
-  const ActiveIcon = roleMeta[activeRole].icon;
+  const ActiveIcon = metaFor(activeRole).icon;
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border/40 bg-background/60 px-3 backdrop-blur-xl md:px-6">
@@ -41,7 +52,7 @@ export const TopBar = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="hidden h-9 gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 text-xs backdrop-blur md:inline-flex">
               <ActiveIcon className="h-3.5 w-3.5 text-primary" />
-              {roleMeta[activeRole].label}
+              {metaFor(activeRole).label}
               <ChevronsUpDown className="h-3 w-3 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
@@ -49,7 +60,7 @@ export const TopBar = () => {
             <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {roles.map((r) => {
-              const Meta = roleMeta[r];
+              const Meta = metaFor(r);
               const Icon = Meta.icon;
               return (
                 <DropdownMenuItem key={r} onClick={() => setActiveRole(r).then(() => navigate("/app"))}>
@@ -64,7 +75,7 @@ export const TopBar = () => {
       ) : (
         <Button variant="ghost" size="sm" className="hidden h-9 gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 text-xs md:inline-flex" disabled>
           <ActiveIcon className="h-3.5 w-3.5 text-primary" />
-          {roleMeta[activeRole].label}
+          {metaFor(activeRole).label}
         </Button>
       )}
       <button
@@ -90,6 +101,8 @@ export const TopBar = () => {
           <Bell className="h-4 w-4" />
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary animate-pulse-soft" />
         </Button>
+        <LanguageMenu />
+        <AccessibilityMenu />
         <QuickCreate />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
