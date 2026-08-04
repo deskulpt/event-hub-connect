@@ -41,7 +41,7 @@ export const TopBar = () => {
   const navigate = useNavigate();
   const [aiOpen, setAiOpen] = useState(false);
   const initials = (profile?.full_name || profile?.email || "U").slice(0, 2).toUpperCase();
-  const ActiveIcon = roleMeta[activeRole].icon;
+  const ActiveIcon = metaFor(activeRole).icon;
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border/40 bg-background/60 px-3 backdrop-blur-xl md:px-6">
@@ -51,7 +51,7 @@ export const TopBar = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="hidden h-9 gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 text-xs backdrop-blur md:inline-flex">
               <ActiveIcon className="h-3.5 w-3.5 text-primary" />
-              {roleMeta[activeRole].label}
+              {metaFor(activeRole).label}
               <ChevronsUpDown className="h-3 w-3 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
@@ -59,7 +59,7 @@ export const TopBar = () => {
             <DropdownMenuLabel>Switch workspace</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {roles.map((r) => {
-              const Meta = roleMeta[r];
+              const Meta = metaFor(r);
               const Icon = Meta.icon;
               return (
                 <DropdownMenuItem key={r} onClick={() => setActiveRole(r).then(() => navigate("/app"))}>
@@ -74,7 +74,7 @@ export const TopBar = () => {
       ) : (
         <Button variant="ghost" size="sm" className="hidden h-9 gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 text-xs md:inline-flex" disabled>
           <ActiveIcon className="h-3.5 w-3.5 text-primary" />
-          {roleMeta[activeRole].label}
+          {metaFor(activeRole).label}
         </Button>
       )}
       <button
