@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { PreferencesProvider } from "@/contexts/PreferencesContext";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/auth/Auth";
@@ -49,12 +50,18 @@ import Inbox from "./pages/app/Inbox";
 import Insights from "./pages/app/Insights";
 import Settings from "./pages/app/settings/Settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { RequireStaff } from "./components/RequireStaff";
 import { Circles } from "./pages/app/circles/Circles";
+import { CircleDetail } from "./pages/app/circles/CircleDetail";
 import { Proposals } from "./pages/app/proposals/Proposals";
 import { Perks } from "./pages/app/perks/Perks";
 import { ManagePerks } from "./pages/app/perks/ManagePerks";
 import { Memorabilia } from "./pages/app/memorabilia/Memorabilia";
 import { Orgs } from "./pages/app/orgs/Orgs";
+import { OrgDetail } from "./pages/app/orgs/OrgDetail";
+import { Sponsorships } from "./pages/app/orgs/Sponsorships";
+import { Admin } from "./pages/app/admin/Admin";
+import { Credentials } from "./pages/app/trust/Credentials";
 
 const queryClient = new QueryClient();
 
@@ -65,62 +72,84 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/i/:slug" element={<InvitePage />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+          <PreferencesProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/i/:slug" element={<InvitePage />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
-            <Route path="/app" element={<AppLayout />}>
-              <Route index element={<Home />} />
-              <Route path="circles" element={<Circles />} />
-              <Route path="proposals" element={<Proposals />} />
-              <Route path="perks" element={<Perks />} />
-              <Route path="perks/manage" element={<ManagePerks />} />
-              <Route path="memorabilia" element={<Memorabilia />} />
-              <Route path="orgs" element={<Orgs />} />
-              <Route path="events" element={<AllEvents />} />
-              <Route path="events/new" element={<EventNew />} />
-              <Route path="events/:id" element={<EventDetail />} />
-              <Route path="marketplace" element={<Discover />} />
-              <Route path="marketplace/venues" element={<Venues />} />
-              <Route path="marketplace/pros" element={<Pros />} />
-              <Route path="marketplace/businesses" element={<Businesses />} />
-              <Route path="marketplace/compare" element={<Compare />} />
-              <Route path="marketplace/saved" element={<Saved />} />
-              <Route path="marketplace/:type/:id" element={<ListingDetail />} />
-              <Route path="crm" element={<Pipeline />} />
-              <Route path="crm/contacts" element={<Contacts />} />
-              <Route path="crm/conversations" element={<Conversations />} />
-              <Route path="crm/inquiries" element={<Inquiries />} />
-              <Route path="crm/calls" element={<Calls />} />
-              <Route path="crm/bookings" element={<Bookings />} />
-              <Route path="crm/tasks" element={<Tasks />} />
-              <Route path="calendar" element={<MasterCalendar />} />
-              <Route path="calendar/availability" element={<Availability />} />
-              <Route path="calendar/scheduling" element={<Scheduling />} />
-              <Route path="finance" element={<FinanceOverview />} />
-              <Route path="finance/transactions" element={<Transactions />} />
-              <Route path="finance/invoices" element={<Invoices />} />
-              <Route path="finance/receipts" element={<Receipts />} />
-              <Route path="finance/payouts" element={<Payouts />} />
-              <Route path="finance/pnl" element={<Pnl />} />
-              <Route path="finance/integrations" element={<Integrations />} />
-              <Route path="trust" element={<Verification />} />
-              <Route path="trust/insurance" element={<Insurance />} />
-              <Route path="trust/reviews" element={<Reviews />} />
-              <Route path="trust/disputes" element={<Disputes />} />
-              <Route path="trust/policies" element={<Policies />} />
-              <Route path="inbox" element={<Inbox />} />
-              <Route path="insights" element={<Insights />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="settings/*" element={<Settings />} />
-            </Route>
+              <Route path="/app" element={<AppLayout />}>
+                <Route index element={<Home />} />
+                <Route path="circles" element={<Circles />} />
+                <Route path="circles/:id" element={<CircleDetail />} />
+                <Route path="proposals" element={<Proposals />} />
+                <Route path="perks" element={<Perks />} />
+                <Route path="perks/manage" element={<ManagePerks />} />
+                <Route path="memorabilia" element={<Memorabilia />} />
+                <Route path="orgs" element={<Orgs />} />
+                <Route path="orgs/sponsorships" element={<Sponsorships />} />
+                <Route path="orgs/:id" element={<OrgDetail />} />
+                <Route path="events" element={<AllEvents />} />
+                <Route path="events/new" element={<EventNew />} />
+                <Route path="events/:id" element={<EventDetail />} />
+                <Route path="marketplace" element={<Discover />} />
+                <Route path="marketplace/venues" element={<Venues />} />
+                <Route path="marketplace/pros" element={<Pros />} />
+                <Route path="marketplace/businesses" element={<Businesses />} />
+                <Route path="marketplace/compare" element={<Compare />} />
+                <Route path="marketplace/saved" element={<Saved />} />
+                <Route path="marketplace/:type/:id" element={<ListingDetail />} />
+                <Route path="crm" element={<Pipeline />} />
+                <Route path="crm/contacts" element={<Contacts />} />
+                <Route path="crm/conversations" element={<Conversations />} />
+                <Route path="crm/inquiries" element={<Inquiries />} />
+                <Route path="crm/calls" element={<Calls />} />
+                <Route path="crm/bookings" element={<Bookings />} />
+                <Route path="crm/tasks" element={<Tasks />} />
+                <Route path="calendar" element={<MasterCalendar />} />
+                <Route path="calendar/availability" element={<Availability />} />
+                <Route path="calendar/scheduling" element={<Scheduling />} />
+                <Route path="finance" element={<FinanceOverview />} />
+                <Route path="finance/transactions" element={<Transactions />} />
+                <Route path="finance/invoices" element={<Invoices />} />
+                <Route path="finance/receipts" element={<Receipts />} />
+                <Route path="finance/payouts" element={<Payouts />} />
+                <Route path="finance/pnl" element={<Pnl />} />
+                <Route path="finance/integrations" element={<Integrations />} />
+                <Route path="trust" element={<Verification />} />
+                <Route path="trust/credentials" element={<Credentials />} />
+                <Route path="trust/insurance" element={<Insurance />} />
+                <Route path="trust/reviews" element={<Reviews />} />
+                <Route path="trust/disputes" element={<Disputes />} />
+                <Route path="trust/policies" element={<Policies />} />
+                <Route
+                  path="admin"
+                  element={
+                    <RequireStaff>
+                      <Admin />
+                    </RequireStaff>
+                  }
+                />
+                <Route
+                  path="admin/*"
+                  element={
+                    <RequireStaff>
+                      <Admin />
+                    </RequireStaff>
+                  }
+                />
+                <Route path="inbox" element={<Inbox />} />
+                <Route path="insights" element={<Insights />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="settings/*" element={<Settings />} />
+              </Route>
 
-            <Route path="/app/*" element={<Navigate to="/app" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="/app/*" element={<Navigate to="/app" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PreferencesProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

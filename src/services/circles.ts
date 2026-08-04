@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Circle } from "@/types/community";
+import type { Circle, CircleMember } from "@/types/community";
 
 export const listCircles = async (localityId?: string | null): Promise<Circle[]> => {
   let query = supabase.from("circles").select("*").eq("published", true);
@@ -7,6 +7,21 @@ export const listCircles = async (localityId?: string | null): Promise<Circle[]>
   const { data, error } = await query.order("member_count", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Circle[];
+};
+
+export const getCircle = async (id: string): Promise<Circle | null> => {
+  const { data, error } = await supabase.from("circles").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return (data as Circle | null) ?? null;
+};
+
+export const listCircleMembers = async (circleId: string): Promise<CircleMember[]> => {
+  const { data, error } = await supabase
+    .from("circle_members")
+    .select("*")
+    .eq("circle_id", circleId);
+  if (error) throw error;
+  return (data ?? []) as CircleMember[];
 };
 
 export const listMyCircleIds = async (userId: string): Promise<string[]> => {
@@ -60,5 +75,14 @@ export const createCircle = async (input: CircleInput, ownerId: string): Promise
   await supabase
     .from("circle_members")
     .insert({ circle_id: data.id, user_id: ownerId, is_organizer: true });
+  return data as Circle;
+};
+
+export const updateCircle = async (
+  id: string,
+  patch: Partial<Pick<Circle, "name" | "description" | "interest_tags" | "language" | "published">>,
+): Promise<Circle> => {
+  const { data, error } = await supabase.from("circles").update(patch).eq("id", id).select().single();
+  if (error) throw error;
   return data as Circle;
 };

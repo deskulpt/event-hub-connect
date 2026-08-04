@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, Plus } from "lucide-react";
 import { PageLayout } from "@/components/shell/PageLayout";
@@ -23,6 +24,7 @@ const KINDS = ["ngo", "resident association", "senior club", "care provider", "b
 export const Orgs = () => {
   const { user } = useAuth();
   const { localityId } = usePreferences();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -136,7 +138,11 @@ export const Orgs = () => {
       {orgs.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {orgs.map((org) => (
-            <Card key={org.id} className="rounded-2xl border-border/60 bg-card/70 backdrop-blur">
+            <Card
+              key={org.id}
+              className="cursor-pointer rounded-2xl border-border/60 bg-card/70 backdrop-blur transition-shadow hover:shadow-soft"
+              onClick={() => navigate(`/app/orgs/${org.id}`)}
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-base">{org.name}</CardTitle>
@@ -149,9 +155,7 @@ export const Orgs = () => {
               <CardContent className="space-y-2">
                 <p className="line-clamp-3 text-sm text-muted-foreground">{org.description}</p>
                 {org.contact_email && (
-                  <a href={`mailto:${org.contact_email}`} className="text-xs text-primary underline">
-                    {org.contact_email}
-                  </a>
+                  <span className="text-xs text-primary underline">{org.contact_email}</span>
                 )}
               </CardContent>
             </Card>

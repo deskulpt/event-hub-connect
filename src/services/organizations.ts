@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Organization, ContentReport } from "@/types/community";
+import type { Organization, ContentReport, OrganizationMember } from "@/types/community";
 
 export const listOrganizations = async (): Promise<Organization[]> => {
   const { data, error } = await supabase
@@ -8,6 +8,12 @@ export const listOrganizations = async (): Promise<Organization[]> => {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Organization[];
+};
+
+export const getOrganization = async (id: string): Promise<Organization | null> => {
+  const { data, error } = await supabase.from("organizations").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return (data as Organization | null) ?? null;
 };
 
 export interface OrganizationInput {
@@ -32,11 +38,43 @@ export const createOrganization = async (
     .select()
     .single();
   if (error) throw error;
+  await supabase
+    .from("organization_members")
+    .insert({ organization_id: data.id, user_id: ownerId, org_role: "admin" });
   return data as Organization;
 };
 
 export const setOrganizationStatus = async (id: string, status: Organization["status"]) => {
   const { error } = await supabase.from("organizations").update({ status }).eq("id", id);
+  if (error) throw error;
+};
+
+export const listOrgMembers = async (organizationId: string): Promise<OrganizationMember[]> => {
+  const { data, error } = await supabase
+    .from("organization_members")
+    .select("*")
+    .eq("organization_id", organizationId);
+  if (error) throw error;
+  return (data ?? []) as OrganizationMember[];
+};
+
+export const inviteOrgMember = async (
+  organizationId: string,
+  userId: string,
+  orgRole = "member",
+) => {
+  const { error } = await supabase
+    .from("organization_members")
+    .insert({ organization_id: organizationId, user_id: userId, org_role: orgRole });
+  if (error) throw error;
+};
+
+export const removeOrgMember = async (organizationId: string, userId: string) => {
+  const { error } = await supabase
+    .from("organization_members")
+    .delete()
+    .eq("organization_id", organizationId)
+    .eq("user_id", userId);
   if (error) throw error;
 };
 

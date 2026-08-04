@@ -15,6 +15,8 @@ export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 // Maps to DB enum recipient_kind: venue | pro | business
 export type ListingKind = "venue" | "pro";
 
+export type VerificationState = "unverified" | "pending" | "verified" | "rejected";
+
 export interface VenueRecord {
   id: string;
   owner_id: string;
@@ -29,6 +31,8 @@ export interface VenueRecord {
   published: boolean;
   created_at: string;
   updated_at: string;
+  accessibility_attributes?: string[];
+  locality_id?: string | null;
 }
 
 export interface VendorRecord {
@@ -44,6 +48,10 @@ export interface VendorRecord {
   published: boolean;
   created_at: string;
   updated_at: string;
+  verification_state?: VerificationState;
+  background_check_state?: VerificationState;
+  languages_spoken?: string[];
+  locality_id?: string | null;
 }
 
 export type AnyListing =

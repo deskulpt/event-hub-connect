@@ -30,6 +30,14 @@ export interface EventRecord {
   status: EventStatus;
   created_at: string;
   updated_at: string;
+  origin?: string;
+  proposal_id?: string | null;
+  circle_id?: string | null;
+  organization_id?: string | null;
+  locality_id?: string | null;
+  accessibility_attributes?: string[];
+  language?: string | null;
+  indoor_outdoor?: string | null;
 }
 
 export const eventBriefSchema = z.object({

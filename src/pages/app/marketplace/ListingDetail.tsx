@@ -23,6 +23,7 @@ import { formatCents, scoreVendorFit, scoreVenueFit } from "@/lib/fitScore";
 import { FitRing } from "@/components/marketplace/FitRing";
 import { ListingCover } from "@/components/marketplace/ListingCover";
 import { ReviewsSection } from "@/components/marketplace/ReviewsSection";
+import { TrustBadge } from "@/components/trust/TrustBadge";
 
 const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 
@@ -129,6 +130,9 @@ export default function ListingDetail() {
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">{kind === "venue" ? "Venue" : "Pro"}</span>
                   {kind === "pro" && vendor && (
                     <Badge variant="outline" className="rounded-full text-[10px] capitalize">{vendor.category}</Badge>
+                  )}
+                  {kind === "pro" && vendor && (
+                    <TrustBadge state={vendor.verification_state ?? "unverified"} />
                   )}
                 </div>
                 <h1 className="font-display text-2xl font-semibold leading-tight">{name}</h1>

@@ -1,12 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Locality } from "@/types/community";
 
-export const listLocalities = async (): Promise<Locality[]> => {
-  const { data, error } = await supabase
-    .from("localities")
-    .select("*")
-    .eq("active", true)
-    .order("name");
+export const listLocalities = async (opts?: { includeInactive?: boolean }): Promise<Locality[]> => {
+  let query = supabase.from("localities").select("*");
+  if (!opts?.includeInactive) query = query.eq("active", true);
+  const { data, error } = await query.order("name");
   if (error) throw error;
   return (data ?? []) as Locality[];
 };

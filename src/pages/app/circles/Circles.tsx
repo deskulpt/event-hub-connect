@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users, Plus } from "lucide-react";
 import { PageLayout } from "@/components/shell/PageLayout";
@@ -22,6 +23,7 @@ import { INTEREST_OPTIONS } from "@/types/community";
 export const Circles = () => {
   const { user } = useAuth();
   const { localityId, language, t } = usePreferences();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -192,14 +194,20 @@ export const Circles = () => {
             const joined = myIds.includes(circle.id);
             return (
               <Card key={circle.id} className="rounded-2xl border-border/60 bg-card/70 backdrop-blur">
-                <CardHeader className="pb-2">
+                <CardHeader
+                  className="cursor-pointer pb-2"
+                  onClick={() => navigate(`/app/circles/${circle.id}`)}
+                >
                   <CardTitle className="text-base">{circle.name}</CardTitle>
                   <p className="text-xs text-muted-foreground tab-num">
                     {circle.member_count} members · {circle.language.toUpperCase()}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="line-clamp-2 text-sm text-muted-foreground">
+                  <p
+                    className="line-clamp-2 cursor-pointer text-sm text-muted-foreground"
+                    onClick={() => navigate(`/app/circles/${circle.id}`)}
+                  >
                     {circle.description ?? "A local group for neighbours with a shared interest."}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -209,14 +217,23 @@ export const Circles = () => {
                       </Badge>
                     ))}
                   </div>
-                  <Button
-                    variant={joined ? "outline" : "default"}
-                    className="w-full rounded-full"
-                    disabled={!user || membership.isPending}
-                    onClick={() => membership.mutate({ circleId: circle.id, joined })}
-                  >
-                    {joined ? t("circles.leave") : t("circles.join")}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="rounded-full"
+                      onClick={() => navigate(`/app/circles/${circle.id}`)}
+                    >
+                      Open
+                    </Button>
+                    <Button
+                      variant={joined ? "outline" : "default"}
+                      className="flex-1 rounded-full"
+                      disabled={!user || membership.isPending}
+                      onClick={() => membership.mutate({ circleId: circle.id, joined })}
+                    >
+                      {joined ? t("circles.leave") : t("circles.join")}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );

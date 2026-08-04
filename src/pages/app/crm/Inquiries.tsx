@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Send, Inbox, ArrowUpRight } from "lucide-react";
@@ -10,8 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { SendInquiryDialog } from "@/components/crm/SendInquiryDialog";
 import {
@@ -19,6 +24,7 @@ import {
   listInquiriesReceived,
   updateInquiryStatus,
 } from "@/services/inquiries";
+import { acceptInquiryAsBooking } from "@/services/bookings";
 import type { InquiryRecord, InquiryStatus } from "@/types/inquiry";
 
 const statusVariant: Record<InquiryStatus, "default" | "secondary" | "outline" | "destructive"> = {
@@ -36,10 +42,12 @@ const InquiryRow = ({
   inquiry,
   side,
   onUpdate,
+  onAccept,
 }: {
   inquiry: InquiryRecord;
   side: "sent" | "received";
   onUpdate: (id: string, status: InquiryStatus) => void;
+  onAccept: (inquiry: InquiryRecord) => void;
 }) => {
   const budget = formatBudget(inquiry.budget_min_cents, inquiry.budget_max_cents);
   return (
@@ -58,8 +66,9 @@ const InquiryRow = ({
         </div>
         {inquiry.message && <p className="line-clamp-2 text-xs text-muted-foreground">{inquiry.message}</p>}
       </div>
-      {side === "received" && (
-        <div className="flex gap-2">
+      {side === "received" && inquiry.status !== "replied" && inquiry.status !== "declined" && (
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" onClick={() => onAccept(inquiry)}>Accept & book</Button>
           <Button size="sm" variant="outline" onClick={() => onUpdate(inquiry.id, "replied")}>Mark replied</Button>
           <Button size="sm" variant="ghost" onClick={() => onUpdate(inquiry.id, "declined")}>Decline</Button>
         </div>
@@ -70,8 +79,12 @@ const InquiryRow = ({
 
 export default function Inquiries() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"all" | InquiryStatus>("all");
+  const [acceptTarget, setAcceptTarget] = useState<InquiryRecord | null>(null);
+  const [deposit, setDeposit] = useState("");
+  const [total, setTotal] = useState("");
 
   const sentQ = useQuery({
     queryKey: ["inquiries", "sent", user?.id],
@@ -92,6 +105,25 @@ export default function Inquiries() {
       toast.success("Inquiry updated");
     },
     onError: (e: Error) => toast.error(e.message ?? "Update failed"),
+  });
+
+  const acceptMutation = useMutation({
+    mutationFn: () =>
+      acceptInquiryAsBooking(acceptTarget!, user!.id, {
+        deposit: deposit ? Number(deposit) : 0,
+        total: total ? Number(total) : undefined,
+      }),
+    onSuccess: (booking) => {
+      qc.invalidateQueries({ queryKey: ["inquiries"] });
+      qc.invalidateQueries({ queryKey: ["bookings"] });
+      setAcceptTarget(null);
+      setDeposit("");
+      setTotal("");
+      toast.success("Booking created — deposit pending");
+      navigate("/app/crm/bookings");
+      return booking;
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Could not create booking"),
   });
 
   const apply = (rows: InquiryRecord[]) => filter === "all" ? rows : rows.filter((r) => r.status === filter);
@@ -136,7 +168,13 @@ export default function Inquiries() {
               />
             ) : (
               apply(sentQ.data ?? []).map((i) => (
-                <InquiryRow key={i.id} inquiry={i} side="sent" onUpdate={(id, status) => updateMutation.mutate({ id, status })} />
+                <InquiryRow
+                  key={i.id}
+                  inquiry={i}
+                  side="sent"
+                  onUpdate={(id, status) => updateMutation.mutate({ id, status })}
+                  onAccept={setAcceptTarget}
+                />
               ))
             )}
           </CardContent></Card>
@@ -154,12 +192,57 @@ export default function Inquiries() {
               />
             ) : (
               apply(receivedQ.data ?? []).map((i) => (
-                <InquiryRow key={i.id} inquiry={i} side="received" onUpdate={(id, status) => updateMutation.mutate({ id, status })} />
+                <InquiryRow
+                  key={i.id}
+                  inquiry={i}
+                  side="received"
+                  onUpdate={(id, status) => updateMutation.mutate({ id, status })}
+                  onAccept={setAcceptTarget}
+                />
               ))
             )}
           </CardContent></Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={Boolean(acceptTarget)} onOpenChange={(open) => !open && setAcceptTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Accept inquiry as booking</DialogTitle>
+            <DialogDescription>
+              Creates a pending booking for the host. Deposit stays in cents in the ledger.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm font-medium">{acceptTarget?.subject}</p>
+            <Input
+              type="number"
+              min="0"
+              placeholder="Deposit (currency units)"
+              value={deposit}
+              onChange={(e) => setDeposit(e.target.value)}
+              aria-label="Deposit"
+            />
+            <Input
+              type="number"
+              min="0"
+              placeholder="Total (currency units)"
+              value={total}
+              onChange={(e) => setTotal(e.target.value)}
+              aria-label="Total"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              className="rounded-full"
+              disabled={acceptMutation.isPending}
+              onClick={() => acceptMutation.mutate()}
+            >
+              {acceptMutation.isPending ? "Creating…" : "Create booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 }

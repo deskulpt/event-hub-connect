@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { BookingFormInput, BookingRecord, BookingStatus } from "@/types/booking";
+import type { InquiryRecord } from "@/types/inquiry";
+import { updateInquiryStatus } from "@/services/inquiries";
 
 const dollarsToCents = (v: unknown): number => {
   if (v === null || v === undefined || v === "") return 0;
@@ -43,6 +45,30 @@ export const createBooking = async (input: BookingFormInput, hostId: string): Pr
     .select("*").single();
   if (error) throw error;
   return data as BookingRecord;
+};
+
+/** Provider accepts an inquiry and opens a pending booking (deposit optional). */
+export const acceptInquiryAsBooking = async (
+  inquiry: InquiryRecord,
+  providerId: string,
+  opts?: { deposit?: number; total?: number; notes?: string },
+): Promise<BookingRecord> => {
+  const booking = await createBooking(
+    {
+      title: inquiry.subject,
+      event_id: inquiry.event_id,
+      inquiry_id: inquiry.id,
+      provider_id: providerId,
+      provider_kind: inquiry.recipient_kind,
+      event_date: inquiry.requested_date ?? "",
+      deposit: opts?.deposit ?? 0,
+      total: opts?.total ?? (inquiry.budget_max_cents != null ? inquiry.budget_max_cents / 100 : 0),
+      notes: opts?.notes ?? inquiry.message ?? "",
+    },
+    inquiry.sender_id,
+  );
+  await updateInquiryStatus(inquiry.id, "replied", "Accepted — booking created");
+  return booking;
 };
 
 export const updateBookingStatus = async (id: string, status: BookingStatus): Promise<BookingRecord> => {

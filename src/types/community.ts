@@ -192,6 +192,55 @@ export interface SponsorshipPackage {
   active: boolean;
 }
 
+export interface ProfessionalCredential {
+  id: string;
+  vendor_id: string;
+  owner_id: string;
+  kind: string;
+  title: string;
+  document_url: string | null;
+  issued_on: string | null;
+  expires_on: string | null;
+  state: VerificationState;
+  reviewer_note: string | null;
+  created_at: string;
+}
+
+export interface CommissionRule {
+  id: string;
+  category: string;
+  rate_percent: number;
+  floor_cents: number;
+  cap_cents: number | null;
+  effective_from: string;
+  effective_to: string | null;
+}
+
+export interface ProposalGenerationRun {
+  id: string;
+  locality_id: string | null;
+  period: string;
+  proposals_created: number;
+  status: string;
+  model: string | null;
+  diagnostics: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface OrganizationMember {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  org_role: string;
+  created_at: string;
+}
+
+export interface ContentModerationSetting {
+  id: string;
+  key: string;
+  value: Record<string, unknown>;
+}
+
 export interface AccessibilityPrefs {
   textScale?: "normal" | "large" | "xlarge";
   contrast?: "normal" | "high";
