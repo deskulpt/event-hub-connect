@@ -30,12 +30,14 @@ export const listInvitesForEvent = async (eventId: string): Promise<EventInvite[
   return (data ?? []) as EventInvite[];
 };
 
-export const getInviteBySlug = async (slug: string): Promise<EventInvite | null> => {
-  const { data, error } = await supabase
-    .from("event_invites").select("*").eq("slug", slug).maybeSingle();
+export type PublicInvite = Omit<EventInvite, "owner_id" | "source">;
+
+export const getInviteBySlug = async (slug: string): Promise<PublicInvite | null> => {
+  const { data, error } = await supabase.rpc("get_invite_by_slug", { _slug: slug });
   if (error) throw error;
-  return data as EventInvite | null;
+  return ((data ?? [])[0] as PublicInvite | undefined) ?? null;
 };
+
 
 export const uploadInviteImage = async (userId: string, eventId: string, file: File): Promise<string> => {
   const ext = file.name.split(".").pop() ?? "png";
