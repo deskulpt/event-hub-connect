@@ -59,7 +59,7 @@ const itemsByRole: Partial<Record<AppRole, QuickItem[]>> = {
 export const QuickCreate = () => {
   const navigate = useNavigate();
   const { activeRole } = useActiveRole();
-  const items = itemsByRole[activeRole];
+  const items = itemsByRole[activeRole] ?? memberItems;
 
   return (
     <DropdownMenu>
