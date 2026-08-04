@@ -17,7 +17,14 @@ import type { AppRole } from "@/contexts/AuthContext";
 
 type QuickItem = { label: string; icon: typeof Plus; to: string };
 
-const itemsByRole: Record<AppRole, QuickItem[]> = {
+const memberItems: QuickItem[] = [
+  { label: "Create activity", icon: CalendarPlus, to: "/app/events/new" },
+  { label: "Start a circle", icon: UserPlus, to: "/app/circles" },
+  { label: "Vote on proposals", icon: Sparkles, to: "/app/proposals" },
+  { label: "List memorabilia", icon: BookmarkPlus, to: "/app/memorabilia" },
+];
+
+const itemsByRole: Partial<Record<AppRole, QuickItem[]>> = {
   host: [
     { label: "New event", icon: CalendarPlus, to: "/app/events/new" },
     { label: "New inquiry", icon: MessageSquarePlus, to: "/app/crm/inquiries" },
