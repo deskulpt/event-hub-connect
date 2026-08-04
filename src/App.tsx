@@ -68,6 +68,12 @@ const App = () => (
 
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<Home />} />
+              <Route path="circles" element={<Circles />} />
+              <Route path="proposals" element={<Proposals />} />
+              <Route path="perks" element={<Perks />} />
+              <Route path="perks/manage" element={<ManagePerks />} />
+              <Route path="memorabilia" element={<Memorabilia />} />
+              <Route path="orgs" element={<Orgs />} />
               <Route path="events" element={<AllEvents />} />
               <Route path="events/new" element={<EventNew />} />
               <Route path="events/:id" element={<EventDetail />} />
