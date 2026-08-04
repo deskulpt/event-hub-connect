@@ -2,7 +2,22 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "host" | "pro" | "business" | "admin";
+export type AppRole =
+  | "host"
+  | "pro"
+  | "business"
+  | "admin"
+  | "member"
+  | "volunteer_host"
+  | "professional"
+  | "sponsor"
+  | "org_admin"
+  | "moderator"
+  | "ops_admin"
+  | "super_admin";
+
+export const STAFF_ROLES: AppRole[] = ["admin", "ops_admin", "super_admin"];
+export const MODERATOR_ROLES: AppRole[] = [...STAFF_ROLES, "moderator"];
 
 interface Profile {
   id: string;
