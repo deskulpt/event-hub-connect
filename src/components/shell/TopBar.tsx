@@ -18,12 +18,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useState } from "react";
 import { useActiveRole } from "@/hooks/useActiveRole";
 
-const roleMeta: Record<AppRole, { label: string; icon: typeof PartyPopper }> = {
+const roleMeta: Partial<Record<AppRole, { label: string; icon: typeof PartyPopper }>> = {
   host: { label: "Host", icon: PartyPopper },
+  member: { label: "Member", icon: PartyPopper },
+  volunteer_host: { label: "Volunteer host", icon: PartyPopper },
   pro: { label: "Pro", icon: Briefcase },
+  professional: { label: "Professional", icon: Briefcase },
+  sponsor: { label: "Sponsor", icon: Building2 },
   business: { label: "Business", icon: Building2 },
+  org_admin: { label: "Org admin", icon: Building2 },
+  moderator: { label: "Moderator", icon: Sparkles },
   admin: { label: "Admin", icon: Sparkles },
+  ops_admin: { label: "Ops admin", icon: Sparkles },
+  super_admin: { label: "Super admin", icon: Sparkles },
 };
+
+const metaFor = (role: AppRole) => roleMeta[role] ?? { label: "Member", icon: PartyPopper };
 
 export const TopBar = () => {
   const { profile, signOut } = useAuth();
