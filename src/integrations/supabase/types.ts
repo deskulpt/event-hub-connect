@@ -2026,6 +2026,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_self_service_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
+      get_invite_by_slug: {
+        Args: { _slug: string }
+        Returns: {
+          copy: string
+          created_at: string
+          event_id: string
+          headline: string
+          id: string
+          image_url: string
+          rsvp_enabled: boolean
+          slug: string
+        }[]
+      }
+      get_public_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
