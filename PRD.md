@@ -1,8 +1,11 @@
 # PRD — Community Engagement Platform for Adults 50+
 
-**Status:** Draft for sign-off
-**Scope of this document:** Product requirements only. No migrations, route changes, provider integrations, or admin UI are built as part of this document.
-**Approach:** Rename-in-place. The existing application structure is reused and extended rather than rebuilt.
+**Status:** Draft for sign-off  
+**Document type:** Product Requirements Document (long-form)  
+**Scope of this document:** Product requirements only. No migrations, route changes, provider integrations, or admin UI are built as part of this document.  
+**Approach:** Rename-in-place. The existing application structure is reused and extended rather than rebuilt.  
+**Audience:** Product and engineering. Schema and RBAC are described at entity/field-intent level; a separate schema spec can follow after approval.  
+**Launch market:** India · **Launch languages:** English, Hindi, Telugu, Urdu, Kannada, Bengali, Marathi, Tamil
 
 ---
 
@@ -171,7 +174,20 @@ The home surface. One clear primary action above the fold. Contents, in priority
 
 Every list has an intentional loading, empty, and error state. Empty states always propose the next best action rather than simply reporting emptiness.
 
-### 3.3 Circles and clubs
+### 3.3 AI monthly activity ideas and the voting surface
+
+The primary monthly ritual for members. At the start of each voting window the member sees a short, local slate — not an infinite feed.
+
+- Each proposal card shows title, plain-language summary, suggested date/time, indoor/outdoor, accessibility tags, estimated cost per head, and a live vote count against the threshold.
+- Primary action is a single large **Vote for this** control; withdrawing a vote is equally easy.
+- Threshold-met and scheduled states are visually distinct so members know when an idea becomes real.
+- Members who vote are nudged later to RSVP once a host publishes the activity.
+- The surface is language-aware: titles and summaries render in the member's preferred language; vote counts use tabular numerals.
+- Empty slate (no proposals yet for the locality) explains why and offers a widened-radius view or a path to join a circle instead of a blank page.
+
+Detailed engine behaviour is specified in §4.
+
+### 3.4 Circles and clubs
 
 Persistent interest groups within a locality — the connective tissue between one-off activities.
 
@@ -181,22 +197,22 @@ Persistent interest groups within a locality — the connective tissue between o
 - Circles can run recurring meetups that bypass the proposal-voting cycle.
 - Circle activity feeds the proposal engine as a strong signal of local interest.
 
-### 3.4 Event discovery
+### 3.5 Event discovery
 
 - **Internal activities** — generated from proposals or created directly by hosts and organisations.
 - **External listings** — ingested public events (municipal, cultural, temple/community, health camps), clearly labelled as external and unverified, with attribution to the source.
 - Filters: distance, date, interest, language of the event, accessibility suitability, free vs. ticketed, indoor vs. outdoor.
 - Sorting defaults to distance and date, not popularity — relevance for this cohort is local and imminent.
 
-### 3.5 Senior perks
+### 3.6 Senior perks
 
 Discounts and offers published by verified businesses, scoped by locality and category (pharmacy, diagnostics, eyewear, physiotherapy, food, travel, home services). Claim flow issues a redeemable code and records redemption for sponsor reporting in aggregate only.
 
-### 3.6 Memorabilia marketplace
+### 3.7 Memorabilia marketplace
 
 A low-pressure, member-to-member listing surface for books, records, collectibles, craft output, and home-made goods, plus curated listings. Deliberately small in scope: list, browse, message, arrange offline. Payments are out of scope for phase one; every listing carries a safety notice about meeting in public places.
 
-### 3.7 Multilingual AI companion
+### 3.8 Multilingual AI companion
 
 Available from every screen through a persistent, large, clearly labelled control.
 
@@ -208,21 +224,21 @@ Available from every screen through a persistent, large, clearly labelled contro
 - Always discloses that it is an AI. Never gives medical, legal, or financial advice — those requests route to a canned referral response.
 - All companion calls are proxied server-side; conversation history is member-scoped and deletable.
 
-### 3.8 Fact-check and safety
+### 3.9 Fact-check and safety
 
 - Members can submit a forwarded message, image, or link for a scam and misinformation check.
 - The response is a plain-language verdict with reasoning, not a score.
 - Known scam patterns (OTP requests, KYC fraud, lottery, fake pension/subsidy schemes, impersonation of banks and government) are matched against a maintained pattern set before any model call.
 - Anything flagged as high-risk offers a one-tap path to report and to alert the member's caregiver contact.
 
-### 3.9 Referrals and family invites
+### 3.10 Referrals and family invites
 
 - Members can invite peers by phone number or share link; referral credit is tracked for community-building recognition, not cash.
 - Family members can be invited as caregiver-linked accounts with limited, consented visibility (upcoming activities and reminders only — never messages or votes).
 
 ---
 
-## 4. AI proposal engine
+## 4. AI proposal engine (the core feature)
 
 The core differentiator. Each month, for each locality, the engine generates a ranked slate of candidate activities that the community then votes into existence.
 
@@ -315,20 +331,18 @@ Proposal generation runs server-side on a schedule, never client-triggered. Gene
 
 ### 5.3 Feature → provider → fallback mapping
 
-| Feature | Primary | Fallback | Notes |
-| --- | --- | --- | --- |
-| Proposal generation | Lovable AI | — | Scheduled, batched, latency-insensitive |
-| AI companion chat | Lovable AI | — | Latency-sensitive; keep responses short |
-| Content summarisation | Lovable AI | — | Batched where possible |
-| Moderation triage | Lovable AI | Rules-only fallback | Never fully automated for takedown |
-| Fact-check reasoning | Lovable AI | Pattern set only | Pattern match runs first, always |
-| Image description (a11y) | Lovable AI | Alt-text fallback | For members using screen readers |
-| Indian-language translation | Sarvam (planned) | Google / Azure | Slot defined now, wired later |
-| Speech-to-text | Sarvam (planned) | Google / Azure | Voice-first input |
-| Text-to-speech | Sarvam (planned) | Google / Azure | Read-aloud, reminders |
-| Outbound voice calls | Existing caller service | — | Must disclose automation |
-
-Cost, latency, and quality expectations are recorded per feature so routing decisions are made on evidence rather than preference.
+| Feature | Primary | Fallback | Latency | Cost posture | Quality notes |
+| --- | --- | --- | --- | --- | --- |
+| Proposal generation | Lovable AI | — | Batch (minutes OK) | Moderate, monthly | Snapshot inputs for auditability |
+| AI companion chat | Lovable AI | Scripted help menu | Interactive (<3s target) | High volume | Keep answers short; disclose AI |
+| Content summarisation | Lovable AI | Truncation | Near-interactive | Low | Prefer batching |
+| Moderation triage | Lovable AI | Rules-only | Interactive | Low–moderate | Never auto-takedown without human |
+| Fact-check reasoning | Lovable AI | Pattern set only | Interactive | Low | Pattern match always runs first |
+| Image description (a11y) | Lovable AI | Alt-text fallback | Interactive | Low | Required for screen-reader path |
+| Indian-language translation | Sarvam (planned) | Google / Azure | Interactive | Moderate | Slot defined now, wired later |
+| Speech-to-text | Sarvam (planned) | Google / Azure | Interactive | Moderate | Voice-first input |
+| Text-to-speech | Sarvam (planned) | Google / Azure | Interactive | Moderate | Read-aloud, reminders |
+| Outbound voice calls | Existing caller service | — | Async | Per-minute | Must disclose automation |
 
 ### 5.4 Degradation behaviour
 
@@ -336,33 +350,105 @@ If a capability is unavailable, the feature degrades rather than fails: translat
 
 ---
 
-## 6. Admin console
+## 6. Admin console — all twelve panels
 
-Twelve panels. Admin surfaces are English-only at launch and are gated by the permission matrix in §2.2.
+Admin surfaces launch in **English only** and are gated by the permission matrix in §2.2. Each panel below documents purpose, primary screens, key controls, configuration domains written, and role access.
 
-**1. Dashboard** — platform health at a glance: active members by locality, proposals in flight, conversion funnel, host supply ratio, open moderation cases, revenue, AI spend. Access: ops, super.
+### 6.1 Dashboard
 
-**2. User management** — search, filter, and inspect accounts; verify, suspend, restore, merge, and delete; view a member's activity, votes, bookings, and reports. Writes: account status, verification state. Access: ops, super.
+- **Purpose:** Give ops and super admins a single view of platform health so problems are spotted before members feel them.
+- **Primary screens:** Overview grid; locality drill-down; conversion funnel (proposals → votes → published → attended); spend summary.
+- **Key controls:** Time-range selector; locality filter; alert thresholds for host-supply ratio and open high-risk reports.
+- **Config keys written:** none (read-only aggregation over operational data and §7 domains).
+- **Access:** Operations admin, Super admin.
 
-**3. Role and permission management** — assign and revoke roles, define organisation scoping, edit the permission matrix itself. Writes: `role_permissions`. Access: super only for matrix edits; ops for assignment.
+### 6.2 User management
 
-**4. Module toggles** — enable or disable whole modules globally, per locality, or per organisation (memorabilia, perks, external listings, companion, fact-check, ticketing). Writes: `feature_flags`, `feature_toggle_overrides`. Access: ops, super.
+- **Purpose:** Find, inspect, and act on any account without leaving the console.
+- **Primary screens:** Search/filter list; account detail (profile, roles, votes, bookings, reports); action history.
+- **Key controls:** Verify, suspend, restore, merge, soft-delete; force password/OTP reset; attach/detach caregiver link.
+- **Config keys written:** account status and verification state on `profiles` / related verification records (not a §7 domain).
+- **Access:** Operations admin, Super admin.
 
-**5. AI and API settings** — per-feature provider routing, fallback chains, model selection, rate limits, spend caps, health status, and credential management. Writes: `ai_provider_settings`, `ai_provider_configs`. Access: super for credentials; ops for routing.
+### 6.3 Role and permission management
 
-**6. Localization** — manage the eight launch languages, translation coverage per surface, string overrides, regional festival calendars, and per-locality default language. Writes: `localization_settings`. Access: ops, super.
+- **Purpose:** Assign roles and own the permission matrix that every server path must honour.
+- **Primary screens:** Role assignment per user; organisation-scoped role binding; matrix editor.
+- **Key controls:** Grant/revoke role; bind role to organisation; edit module × action cells; freeze destructive roles behind dual control.
+- **Config keys written:** `role_permissions`.
+- **Access:** Super admin for matrix edits; Operations admin for assignment only.
 
-**7. Organizations and NGOs** — application review, verification documents, approval and suspension, org-level module toggles, org billing. Access: ops, super.
+### 6.4 Module toggles
 
-**8. Professional services** — application review, credential and background-check status, category management, rate-card policy, quality and complaint history, delisting. Access: ops, super.
+- **Purpose:** Turn whole product areas on or off globally, per locality, or per organisation without a deploy.
+- **Primary screens:** Global flag board; override list by locality/org; blast-radius preview before save.
+- **Key controls:** Toggle memorabilia, perks, external listings, companion, fact-check, ticketing, sponsorships; schedule enable/disable windows.
+- **Config keys written:** `feature_flags`, `feature_toggle_overrides`.
+- **Access:** Operations admin, Super admin.
 
-**9. Sponsors and advertising** — sponsorship package definition, sponsor approval, placement management, perk approval, campaign performance (aggregate only). Writes: `sponsorship_packages`. Access: ops, super.
+### 6.5 AI and API settings
 
-**10. Events and proposal engine** — locality configuration, radius bands, threshold multiplier, voting window, slate size, auto-publish toggle, manual slate review and editing, regeneration, and per-locality diagnostics. Writes: `event_generation_rules`. Access: ops, super.
+- **Purpose:** Route every AI capability through the abstraction layer with safe credentials, limits, and failover.
+- **Primary screens:** Feature → provider map; provider health; usage and spend; credential vault (masked).
+- **Key controls:** Set primary/fallback chain; model selection; rate limits; monthly spend caps; disable a feature capability; rotate credentials.
+- **Config keys written:** `ai_provider_settings`, `ai_provider_configs`.
+- **Access:** Super admin for credentials; Operations admin for routing and limits.
 
-**11. Finance** — ticketing revenue, commission rules, sponsor invoicing, professional payouts, refunds, disputes, reconciliation, and export. Writes: `commission_rules`. Access: ops (view and operate), super (rule changes).
+### 6.6 Localization
 
-**12. Trust and safety** — moderation queue, report triage, fact-check flags, takedowns, warnings and suspensions, appeal handling, banned-pattern management, and the moderation audit trail. Writes: `content_moderation_settings`. Access: moderator (queue), ops, super.
+- **Purpose:** Keep the eight launch languages current and locality-aware.
+- **Primary screens:** Language inventory; coverage by surface; string override editor; festival calendar; locality default language.
+- **Key controls:** Enable/disable language; set default; import/export string packs; attach regional festival calendars that feed the proposal engine.
+- **Config keys written:** `localization_settings` (and string override store).
+- **Access:** Operations admin, Super admin.
+
+### 6.7 Organizations and NGOs
+
+- **Purpose:** Verify and govern organisations that run programmes on the platform.
+- **Primary screens:** Application queue; org profile and documents; membership roster; org billing snapshot.
+- **Key controls:** Approve, reject, suspend; request more documents; toggle org-scoped modules; open org billing.
+- **Config keys written:** organisation status fields; may apply `feature_toggle_overrides` at org scope.
+- **Access:** Operations admin, Super admin.
+
+### 6.8 Professional services
+
+- **Purpose:** Onboard, verify, and quality-manage the professional supply side.
+- **Primary screens:** Application queue; credential review; category catalogue; complaint history; delist actions.
+- **Key controls:** Approve credentials and background checks; set category policy; delist; freeze payouts pending dispute.
+- **Config keys written:** professional verification state; category policy (may live under `app_settings`).
+- **Access:** Operations admin, Super admin.
+
+### 6.9 Sponsors and advertising
+
+- **Purpose:** Define packages, approve sponsors, and keep perk placements honest.
+- **Primary screens:** Package catalogue; sponsor applications; placement calendar; perk approval queue; aggregate campaign reporting.
+- **Key controls:** Create/edit packages; approve sponsors; approve or pause perks; attach placements to localities or activities.
+- **Config keys written:** `sponsorship_packages`.
+- **Access:** Operations admin, Super admin.
+
+### 6.10 Events and proposal engine
+
+- **Purpose:** Tune the monthly engine and intervene when a locality needs help.
+- **Primary screens:** Locality rules; slate review/edit; generation run history and diagnostics; regeneration console.
+- **Key controls:** Radius bands, threshold multiplier, voting window, slate size, auto-publish toggle; edit or kill a proposal before publish; force regenerate; merge adjacent localities.
+- **Config keys written:** `event_generation_rules`.
+- **Access:** Operations admin, Super admin.
+
+### 6.11 Finance
+
+- **Purpose:** Operate money flows and own commission economics.
+- **Primary screens:** Ticketing ledger; sponsor invoices; professional payouts; refunds/disputes; reconciliation export.
+- **Key controls:** Issue/void invoices; approve payouts; process refunds; edit commission rules (super); export for accounting.
+- **Config keys written:** `commission_rules` (super); operational finance records otherwise.
+- **Access:** Operations admin (view and operate); Super admin (rule changes and destructive overrides).
+
+### 6.12 Trust and safety
+
+- **Purpose:** Keep members safe and keep response times inside SLA.
+- **Primary screens:** Moderation queue; report detail; fact-check flags; appeal board; banned-pattern library; moderation audit trail.
+- **Key controls:** Triage, action, dismiss; warn/suspend accounts; take down content; manage scam pattern set; answer appeals (human confirmation required for permanent bans).
+- **Config keys written:** `content_moderation_settings`.
+- **Access:** Moderator (queue and actions); Operations admin; Super admin.
 
 ---
 
@@ -444,22 +530,24 @@ Existing seeded venue and vendor data remains valid under this mapping and does 
 
 ## 9. API groups
 
-Every third-party call is proxied server-side. Every group enforces auth and the permission matrix at the server boundary.
+Every third-party call is **proxied server-side**. No provider key, payment secret, or verification vendor credential ever reaches the client. Every group enforces authentication and the permission matrix at the server boundary; client route guards are UX only.
 
-| Group | Responsibilities |
-| --- | --- |
-| **Auth** | Signup with age gate, phone OTP, social sign-in, session handling, caregiver-linked accounts |
-| **Profile** | Profile CRUD, language, accessibility preferences, locality, interests, privacy settings |
-| **AI** | Companion chat and voice, translation, TTS/STT, summarisation, image description, fact-check — all through the abstraction layer |
-| **Event engine** | Slate generation, regeneration, locality diagnostics, snapshot retrieval, engine configuration reads |
-| **Voting** | Cast and withdraw votes, tally reads, threshold evaluation, window management |
-| **Event** | Activity CRUD, RSVP, attendance capture, run-of-show, reminders, feedback |
-| **Organization** | Org CRUD, membership, verification, org-scoped reporting and billing |
-| **Professional** | Service profiles, availability, quotes, bookings, credentials, payouts |
-| **Sponsor** | Package purchase, placements, perk publishing, aggregate campaign reporting |
-| **Marketplace** | Perks browse and claim, memorabilia listings, saved items |
-| **Admin config** | Read and write every configuration domain in §7, with validation and audit |
-| **Audit** | Query and export the audit log; super-admin export only |
+| Group | Responsibilities | Key operations | Auth |
+| --- | --- | --- | --- |
+| **Auth** | Signup with age gate, phone OTP, session handling, caregiver-linked accounts | `signup`, `verifyOtp`, `signIn`, `signOut`, `linkCaregiver`, `refreshSession` | Public for signup/OTP; authenticated thereafter |
+| **Profile** | Profile CRUD, language, accessibility, locality, interests, privacy | `getProfile`, `updateProfile`, `setPreferences`, `setLocality`, `setInterests`, `exportData`, `deleteAccount` | Authenticated; own profile only unless staff |
+| **AI** | Companion chat/voice, translation, TTS/STT, summarisation, image description, fact-check via abstraction layer | `chat`, `transcribe`, `speak`, `translate`, `summarise`, `describeImage`, `factCheck` | Authenticated; usage metered |
+| **Event engine** | Slate generation, regeneration, diagnostics, snapshots, engine config reads | `generateSlate`, `regenerate`, `getSnapshot`, `getDiagnostics`, `listRuns` | Staff for generate/regenerate; authenticated read of published slate |
+| **Voting** | Cast/withdraw votes, tallies, threshold evaluation, windows | `castVote`, `withdrawVote`, `getTally`, `listOpenProposals` | Authenticated member; one vote per proposal |
+| **Event** | Activity CRUD, RSVP, attendance, run-of-show, reminders, feedback | `createActivity`, `updateActivity`, `rsvp`, `markAttendance`, `postFeedback`, `listNearby` | Authenticated; create/edit by host/org/staff |
+| **Organization** | Org CRUD, membership, verification, org reporting and billing | `createOrg`, `updateOrg`, `inviteMember`, `listMembers`, `submitVerification`, `orgReport` | Authenticated; org-scoped for admins |
+| **Professional** | Service profiles, availability, quotes, bookings, credentials, payouts | `upsertService`, `setAvailability`, `quote`, `acceptBooking`, `submitCredential`, `requestPayout` | Authenticated professional (or staff) |
+| **Sponsor** | Package purchase, placements, perk publishing, aggregate reporting | `listPackages`, `purchasePackage`, `publishPerk`, `campaignReport` | Authenticated sponsor; aggregate reports only |
+| **Marketplace** | Perks browse/claim, memorabilia listings, saved items | `listPerks`, `claimPerk`, `listMemorabilia`, `createListing`, `withdrawListing`, `saveItem` | Authenticated |
+| **Admin config** | Read/write every §7 domain with validation and audit | `getConfig`, `setConfig`, `listFlags`, `setFlag`, `setProviderRoute`, `setGenerationRules` | Staff; super for credentials and permission matrix |
+| **Audit** | Query and export the audit log | `queryAudit`, `exportAudit` | Staff read; super-admin export only |
+
+**Hard rule:** monetary calculation and mutation (ticketing, commissions, sponsorships, payouts, refunds) happen only inside server functions. Clients may display amounts returned by the server; they may never invent or alter them.
 
 ---
 
