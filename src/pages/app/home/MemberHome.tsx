@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Gift, Sparkles, Users, Vote, ArrowRight, Phone, Volume2, UserPlus } from "lucide-react";
+import { Gift, Sparkles, Users, Vote, ArrowRight, Volume2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { PageHeader } from "@/components/shell/PageHeader";
@@ -86,6 +86,21 @@ export const MemberHome = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  const bringFriend = async () => {
+    const url = window.location.origin;
+    const text = "Join me on Vibely — local activities with neighbours nearby.";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Vibely", text, url });
+        return;
+      }
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      toast.success("Invite link copied — send it on WhatsApp or SMS");
+    } catch {
+      toast.message("Share from your browser menu, or copy the site address");
+    }
+  };
+
   const primaryProposal = proposals[0];
   const primaryCircle = circles.find((c) => !myIds.includes(c.id)) ?? circles[0];
 
@@ -135,15 +150,6 @@ export const MemberHome = () => {
             <Users className="h-4 w-4" /> {t("home.join")}: {primaryCircle.name}
           </Button>
         )}
-        {primaryProposal && (
-          <Button
-            variant="outline"
-            className="rounded-full min-h-11"
-            onClick={() => toast.message(t("home.callMe"), { description: primaryProposal.title })}
-          >
-            <Phone className="h-4 w-4" /> {t("home.callMe")}
-          </Button>
-        )}
         {(accessibility.readAloud || primaryProposal) && (
           <Button
             variant="outline"
@@ -159,11 +165,7 @@ export const MemberHome = () => {
             <Volume2 className="h-4 w-4" /> {t("home.readAloud")}
           </Button>
         )}
-        <Button
-          variant="outline"
-          className="rounded-full min-h-11"
-          onClick={() => navigate("/app/settings")}
-        >
+        <Button variant="outline" className="rounded-full min-h-11" onClick={() => void bringFriend()}>
           <UserPlus className="h-4 w-4" /> {t("home.bringFriend")}
         </Button>
       </div>
