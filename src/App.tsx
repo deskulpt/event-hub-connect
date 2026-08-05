@@ -58,6 +58,8 @@ import { ManagePerks } from "./pages/app/perks/ManagePerks";
 import { Memorabilia } from "./pages/app/memorabilia/Memorabilia";
 import { Orgs } from "./pages/app/orgs/Orgs";
 import { Admin } from "./pages/app/admin/Admin";
+import { Credentials } from "./pages/app/trust/Credentials";
+import { Sponsorship } from "./pages/app/sponsorship/Sponsorship";
 
 
 const queryClient = new QueryClient();
@@ -114,6 +116,8 @@ const App = () => (
               <Route path="finance/pnl" element={<Pnl />} />
               <Route path="finance/integrations" element={<Integrations />} />
               <Route path="trust" element={<Verification />} />
+              <Route path="trust/credentials" element={<Credentials />} />
+              <Route path="sponsorship" element={<Sponsorship />} />
               <Route path="trust/insurance" element={<Insurance />} />
               <Route path="trust/reviews" element={<Reviews />} />
               <Route path="trust/disputes" element={<Disputes />} />
