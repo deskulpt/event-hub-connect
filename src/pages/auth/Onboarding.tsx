@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Sparkles, PartyPopper, Briefcase, Building2, Check, ArrowRight, MapPin,
-  Calendar as CalendarIcon, Users, Heart,
+  Calendar as CalendarIcon, Users, Heart, Languages,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,17 +17,20 @@ import { readPendingBrief, clearPendingBrief, briefToTitle, briefToEventTypeSlug
 import { createEvent } from "@/services/events";
 import { listLocalities, nearestLocality } from "@/services/localities";
 import { CityAutocomplete } from "@/components/CityAutocomplete";
-import { SUPPORTED_LANGUAGES, type LanguageCode } from "@/lib/i18n";
+import { SUPPORTED_LANGUAGES, translate, type LanguageCode } from "@/lib/i18n";
 import { INTEREST_OPTIONS, type AccessibilityPrefs } from "@/types/community";
 import type { CitySuggestion } from "@/services/places";
 
-const AGE_BANDS = ["50-54", "55-59", "60-64", "65-69", "70-74", "75+"] as const;
+const AGE_BANDS = ["50-54", "55-59", "60-64", "65-69", "70-74", "75+", "under-50"] as const;
+
+/** Steps match PRD §3.1: language → age → prefs → role/confirm */
+const STEPS = ["language", "age", "prefs", "role"] as const;
 
 const roleOptions: { id: AppRole; title: string; desc: string; icon: React.ElementType; gradient: string }[] = [
   { id: "member", title: "I'm a Member", desc: "Discover nearby activities, vote, and join circles.", icon: Heart, gradient: "bg-gradient-mint" },
-  { id: "host", title: "I'm a Host", desc: "Plan events for myself, my family, or my company.", icon: PartyPopper, gradient: "bg-gradient-sunset" },
-  { id: "pro", title: "I'm a Pro", desc: "Independent artist, chef, photographer, planner, DJ.", icon: Briefcase, gradient: "bg-gradient-aurora" },
-  { id: "business", title: "I'm a Business", desc: "Venue, vendor, supplier, or multi-location operator.", icon: Building2, gradient: "bg-gradient-ocean" },
+  { id: "host", title: "I'm a Host", desc: "Plan activities for family, friends, or a group.", icon: PartyPopper, gradient: "bg-gradient-sunset" },
+  { id: "pro", title: "I'm a Pro", desc: "Instructor, guide, therapist, musician, or trainer.", icon: Briefcase, gradient: "bg-gradient-aurora" },
+  { id: "business", title: "I'm a Business", desc: "Venue, sponsor, NGO, or multi-location operator.", icon: Building2, gradient: "bg-gradient-ocean" },
 ];
 
 export default function Onboarding() {
@@ -43,14 +46,24 @@ export default function Onboarding() {
   const [city, setCity] = useState(brief?.city ?? "");
   const [localityId, setLocalityId] = useState<string | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
+  const [caregiverName, setCaregiverName] = useState("");
+  const [caregiverPhone, setCaregiverPhone] = useState("");
   const [accessibility, setAccessibility] = useState<AccessibilityPrefs>({
-    textScale: "normal",
+    textScale: "large",
     contrast: "normal",
     reduceMotion: false,
+    readAloud: false,
   });
+  const [voiceFirst, setVoiceFirst] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const t = (key: string) => translate(language, key);
   const localitiesQ = useQuery({ queryKey: ["localities"], queryFn: listLocalities });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("lang", language);
+    document.documentElement.setAttribute("dir", language === "ur" ? "rtl" : "ltr");
+  }, [language]);
 
   useEffect(() => {
     if (brief?.city && localitiesQ.data?.length) {
@@ -93,8 +106,13 @@ export default function Onboarding() {
   const finish = async () => {
     if (!user) return;
     if (!ageBand) {
-      toast.error("Please choose your age band");
+      toast.error(t("onboarding.ageRequired"));
       setStep(1);
+      return;
+    }
+    if (interests.length < 3) {
+      toast.error(t("onboarding.interestsMin"));
+      setStep(2);
       return;
     }
     setLoading(true);
@@ -103,6 +121,12 @@ export default function Onboarding() {
         const { error: rolesErr } = await supabase.rpc("claim_self_service_role", { _role: role });
         if (rolesErr) throw rolesErr;
       }
+
+      const prefsPayload = {
+        ...accessibility,
+        caregiverName: caregiverName.trim() || undefined,
+        caregiverPhone: caregiverPhone.trim() || undefined,
+      };
 
       const { error: profErr } = await supabase
         .from("profiles")
@@ -113,7 +137,8 @@ export default function Onboarding() {
           preferred_language: language,
           locality_id: localityId,
           interests,
-          accessibility_prefs: accessibility,
+          accessibility_prefs: prefsPayload,
+          voice_first_enabled: voiceFirst,
         })
         .eq("id", user.id);
       if (profErr) throw profErr;
@@ -121,7 +146,7 @@ export default function Onboarding() {
       await refreshProfile();
 
       if (active === "host") {
-        const title = eventTitle.trim() || "My first event";
+        const title = eventTitle.trim() || "My first activity";
         const ev = await createEvent(
           {
             title,
@@ -152,8 +177,12 @@ export default function Onboarding() {
     }
   };
 
-  const canContinueRole = selected.length > 0;
-  const canContinuePrefs = Boolean(ageBand) && interests.length >= 1;
+  const canLeaveLanguage = Boolean(language);
+  const canLeaveAge = Boolean(ageBand);
+  const canLeavePrefs = interests.length >= 3;
+  const canFinish =
+    selected.length > 0 &&
+    (active !== "host" || eventTitle.trim().length >= 2);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-mesh px-4 py-12">
@@ -166,20 +195,21 @@ export default function Onboarding() {
             <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
           </div>
           <h1 className="font-display text-4xl font-semibold tracking-tight text-secondary sm:text-5xl">
-            {step === 0 && <>How will you use <span className="text-gradient">Vibely</span>?</>}
-            {step === 1 && <>Make it <span className="text-gradient">yours</span></>}
-            {step === 2 && active === "host" && <>Your first <span className="text-gradient">activity</span></>}
-            {step === 2 && active !== "host" && <>You're <span className="text-gradient">ready</span></>}
+            {step === 0 && <>{t("onboarding.langTitle")}</>}
+            {step === 1 && <>{t("onboarding.ageTitle")}</>}
+            {step === 2 && <>{t("onboarding.prefsTitle")}</>}
+            {step === 3 && <>{t("onboarding.roleTitle")} <span className="text-gradient">Vibely</span>?</>}
           </h1>
           <p className="mt-3 text-muted-foreground">
-            {step === 0 && "Pick one or more — you can switch any time."}
-            {step === 1 && "Age band, locality, language, interests and accessibility."}
-            {step === 2 && (active === "host" ? "Confirm your first activity and go." : "Enter your community home.")}
+            {step === 0 && t("onboarding.langSubtitle")}
+            {step === 1 && t("onboarding.ageSubtitle")}
+            {step === 2 && t("onboarding.prefsSubtitle")}
+            {step === 3 && t("onboarding.roleSubtitle")}
           </p>
           <div className="mt-4 flex justify-center gap-2">
-            {[0, 1, 2].map((i) => (
+            {STEPS.map((_, i) => (
               <span
-                key={i}
+                key={STEPS[i]}
                 className={cn("h-1.5 w-8 rounded-full", i <= step ? "bg-primary" : "bg-border")}
               />
             ))}
@@ -187,6 +217,241 @@ export default function Onboarding() {
         </div>
 
         {step === 0 && (
+          <div className="bento space-y-6 p-6 sm:p-8">
+            <div className="flex items-center gap-2 text-primary">
+              <Languages className="h-5 w-5" />
+              <p className="text-xs font-semibold uppercase tracking-wider">{t("onboarding.language")}</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => setLanguage(lang.code)}
+                  className={cn(
+                    "rounded-2xl border px-4 py-4 text-left transition-colors",
+                    language === lang.code
+                      ? "border-primary bg-primary/10 ring-2 ring-primary"
+                      : "border-border/60 hover:bg-muted/50",
+                  )}
+                >
+                  <p className="font-display text-lg font-semibold">{lang.native}</p>
+                  <p className="text-xs text-muted-foreground">{lang.label}</p>
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button
+                size="lg"
+                disabled={!canLeaveLanguage}
+                onClick={() => setStep(1)}
+                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
+              >
+                {t("common.continue")} <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="bento space-y-6 p-6 sm:p-8">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">{t("onboarding.ageBand")}</p>
+            <div className="flex flex-wrap gap-2">
+              {AGE_BANDS.map((band) => (
+                <button
+                  key={band}
+                  type="button"
+                  onClick={() => setAgeBand(band)}
+                  className={cn(
+                    "min-h-11 rounded-full border px-4 py-2 text-sm tab-num transition-colors",
+                    ageBand === band
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/60 text-muted-foreground hover:bg-muted/50",
+                  )}
+                >
+                  {band === "under-50" ? t("onboarding.under50") : band}
+                </button>
+              ))}
+            </div>
+            {ageBand === "under-50" && (
+              <p className="rounded-2xl border border-accent/40 bg-accent/10 p-4 text-sm">
+                {t("onboarding.caregiverPath")}
+              </p>
+            )}
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => setStep(0)}>{t("common.back")}</Button>
+              <Button
+                size="lg"
+                disabled={!canLeaveAge}
+                onClick={() => setStep(2)}
+                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
+              >
+                {t("common.continue")} <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="bento space-y-6 p-6 sm:p-8">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">{t("onboarding.locality")}</p>
+              <CityAutocomplete value={city} onChange={onCityChange} placeholder={t("onboarding.cityPlaceholder")} />
+              {(localitiesQ.data ?? []).length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {(localitiesQ.data ?? []).slice(0, 8).map((loc) => (
+                    <button
+                      key={loc.id}
+                      type="button"
+                      onClick={() => {
+                        setLocalityId(loc.id);
+                        setCity(loc.name);
+                      }}
+                      className={cn(
+                        "min-h-10 rounded-full border px-3 py-1 text-xs transition-colors",
+                        localityId === loc.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border/60 text-muted-foreground hover:bg-muted/50",
+                      )}
+                    >
+                      {loc.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">
+                {t("onboarding.interests")} ({interests.length}/3+)
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {INTEREST_OPTIONS.map((interest) => {
+                  const selectedInterest = interests.includes(interest);
+                  return (
+                    <button
+                      key={interest}
+                      type="button"
+                      onClick={() =>
+                        setInterests(
+                          selectedInterest
+                            ? interests.filter((i) => i !== interest)
+                            : [...interests, interest],
+                        )
+                      }
+                      className={cn(
+                        "min-h-10 rounded-full border px-3 py-1 text-xs capitalize transition-colors",
+                        selectedInterest
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border/60 text-muted-foreground hover:bg-muted/50",
+                      )}
+                    >
+                      {interest}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">{t("onboarding.accessibility")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(["normal", "large", "xlarge"] as const).map((scale) => (
+                  <button
+                    key={scale}
+                    type="button"
+                    onClick={() => setAccessibility((a) => ({ ...a, textScale: scale }))}
+                    className={cn(
+                      "min-h-10 rounded-full border px-3 py-1.5 text-xs capitalize transition-colors",
+                      accessibility.textScale === scale
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/60 text-muted-foreground hover:bg-muted/50",
+                    )}
+                  >
+                    {t(`a11y.text.${scale}`)}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setAccessibility((a) => ({
+                      ...a,
+                      contrast: a.contrast === "high" ? "normal" : "high",
+                    }))
+                  }
+                  className={cn(
+                    "min-h-10 rounded-full border px-3 py-1.5 text-xs transition-colors",
+                    accessibility.contrast === "high"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/60 text-muted-foreground hover:bg-muted/50",
+                  )}
+                >
+                  {t("a11y.highContrast")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccessibility((a) => ({ ...a, reduceMotion: !a.reduceMotion }))}
+                  className={cn(
+                    "min-h-10 rounded-full border px-3 py-1.5 text-xs transition-colors",
+                    accessibility.reduceMotion
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/60 text-muted-foreground hover:bg-muted/50",
+                  )}
+                >
+                  {t("a11y.reduceMotion")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVoiceFirst((v) => !v)}
+                  className={cn(
+                    "min-h-10 rounded-full border px-3 py-1.5 text-xs transition-colors",
+                    voiceFirst
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/60 text-muted-foreground hover:bg-muted/50",
+                  )}
+                >
+                  {t("a11y.voiceFirst")}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">
+                {t("onboarding.caregiverOptional")}
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Input
+                  placeholder={t("onboarding.caregiverName")}
+                  value={caregiverName}
+                  onChange={(e) => setCaregiverName(e.target.value)}
+                  className="h-11 rounded-xl"
+                  aria-label={t("onboarding.caregiverName")}
+                />
+                <Input
+                  placeholder={t("onboarding.caregiverPhone")}
+                  value={caregiverPhone}
+                  onChange={(e) => setCaregiverPhone(e.target.value)}
+                  className="h-11 rounded-xl"
+                  aria-label={t("onboarding.caregiverPhone")}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-2">
+              <Button variant="ghost" onClick={() => setStep(1)}>{t("common.back")}</Button>
+              <Button
+                size="lg"
+                disabled={!canLeavePrefs}
+                onClick={() => setStep(3)}
+                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
+              >
+                {t("common.continue")} <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
           <>
             <div className="grid gap-4 sm:grid-cols-2">
               {roleOptions.map((r) => {
@@ -216,11 +481,11 @@ export default function Onboarding() {
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setActive(r.id); }}
                           className={cn(
-                            "mt-4 w-full rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors",
-                            isActive ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40",
+                            "mt-4 min-h-10 w-full rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors",
+                            isActive ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
                           )}
                         >
-                          {isActive ? "✓ Default home" : "Make default"}
+                          {isActive ? t("onboarding.defaultHome") : t("onboarding.makeDefault")}
                         </button>
                       )}
                     </CardContent>
@@ -228,200 +493,15 @@ export default function Onboarding() {
                 );
               })}
             </div>
-            <div className="mt-8 flex justify-end">
-              <Button
-                size="lg"
-                disabled={!canContinueRole}
-                onClick={() => setStep(1)}
-                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
-              >
-                Continue <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-          </>
-        )}
 
-        {step === 1 && (
-          <div className="bento space-y-6 p-6 sm:p-8">
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">Age band</p>
-              <div className="flex flex-wrap gap-1.5">
-                {AGE_BANDS.map((band) => (
-                  <button
-                    key={band}
-                    type="button"
-                    onClick={() => setAgeBand(band)}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs tab-num transition-colors",
-                      ageBand === band
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                    )}
-                  >
-                    {band}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">Language</p>
-              <div className="flex flex-wrap gap-1.5">
-                {SUPPORTED_LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    type="button"
-                    onClick={() => setLanguage(lang.code)}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                      language === lang.code
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                    )}
-                  >
-                    {lang.native}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">Locality</p>
-              <CityAutocomplete value={city} onChange={onCityChange} placeholder="Your neighbourhood or city" />
-              {(localitiesQ.data ?? []).length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {(localitiesQ.data ?? []).slice(0, 8).map((loc) => (
-                    <button
-                      key={loc.id}
-                      type="button"
-                      onClick={() => {
-                        setLocalityId(loc.id);
-                        setCity(loc.name);
-                      }}
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-xs transition-colors",
-                        localityId === loc.id
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                      )}
-                    >
-                      {loc.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">Interests (pick at least 1)</p>
-              <div className="flex flex-wrap gap-1.5">
-                {INTEREST_OPTIONS.map((interest) => {
-                  const selectedInterest = interests.includes(interest);
-                  return (
-                    <button
-                      key={interest}
-                      type="button"
-                      onClick={() =>
-                        setInterests(
-                          selectedInterest
-                            ? interests.filter((i) => i !== interest)
-                            : [...interests, interest],
-                        )
-                      }
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-xs capitalize transition-colors",
-                        selectedInterest
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                      )}
-                    >
-                      {interest}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">Accessibility</p>
-              <div className="flex flex-wrap gap-1.5">
-                {(["normal", "large", "xlarge"] as const).map((scale) => (
-                  <button
-                    key={scale}
-                    type="button"
-                    onClick={() => setAccessibility((a) => ({ ...a, textScale: scale }))}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs capitalize transition-colors",
-                      accessibility.textScale === scale
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                    )}
-                  >
-                    Text {scale}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setAccessibility((a) => ({
-                      ...a,
-                      contrast: a.contrast === "high" ? "normal" : "high",
-                    }))
-                  }
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                    accessibility.contrast === "high"
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                  )}
-                >
-                  High contrast
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setAccessibility((a) => ({ ...a, reduceMotion: !a.reduceMotion }))
-                  }
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                    accessibility.reduceMotion
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                  )}
-                >
-                  Reduce motion
-                </button>
-              </div>
-            </div>
-
-            <div className="flex justify-between pt-2">
-              <Button variant="ghost" onClick={() => setStep(0)}>Back</Button>
-              <Button
-                size="lg"
-                disabled={!canContinuePrefs}
-                onClick={() => setStep(2)}
-                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
-              >
-                Continue <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <>
             {active === "host" && (
-              <div className="bento p-6 sm:p-8">
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary">Your first activity</p>
-                <h2 className="mt-2 font-display text-2xl font-semibold text-secondary">
-                  {brief ? "Looks great — let's lock it in." : "Name your first activity"}
-                </h2>
+              <div className="bento mt-6 p-6 sm:p-8">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary">{t("onboarding.firstActivity")}</p>
                 <div className="mt-4">
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Activity name</label>
                   <Input
                     value={eventTitle}
                     onChange={(e) => setEventTitle(e.target.value)}
-                    placeholder="e.g. Morning walk club kickoff"
+                    placeholder={t("onboarding.activityName")}
                     className="h-11 rounded-xl"
                   />
                 </div>
@@ -429,7 +509,7 @@ export default function Onboarding() {
                   <div className="mt-4 flex flex-wrap gap-2">
                     {brief.guests && (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium">
-                        <Users className="h-3.5 w-3.5 text-primary" /> {brief.guests} guests
+                        <Users className="h-3.5 w-3.5 text-primary" /> {brief.guests}
                       </span>
                     )}
                     {brief.date && (
@@ -447,26 +527,19 @@ export default function Onboarding() {
               </div>
             )}
 
-            {active !== "host" && (
-              <div className="bento p-6 text-center sm:p-8">
-                <p className="font-display text-xl font-semibold">
-                  Language {language.toUpperCase()} · {ageBand} · {interests.length} interests
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {localityId ? "Locality saved." : "You can set locality later in Settings."}
-                </p>
-              </div>
-            )}
-
             <div className="mt-8 flex justify-between">
-              <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
+              <Button variant="ghost" onClick={() => setStep(2)}>{t("common.back")}</Button>
               <Button
                 size="lg"
                 onClick={finish}
-                disabled={loading || (active === "host" && eventTitle.trim().length < 2)}
+                disabled={loading || !canFinish}
                 className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
               >
-                {loading ? "Setting up…" : active === "host" ? "Create my activity" : "Enter Vibely"}
+                {loading
+                  ? t("common.loading")
+                  : active === "host"
+                    ? t("onboarding.createActivity")
+                    : t("onboarding.enter")}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>

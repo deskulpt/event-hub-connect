@@ -73,6 +73,12 @@ export const AccessibilityMenu = () => {
         >
           Reduce motion
         </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={Boolean(accessibility.readAloud)}
+          onCheckedChange={(checked) => void setAccessibility({ readAloud: checked })}
+        >
+          Prefer read aloud
+        </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
