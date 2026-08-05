@@ -1,6 +1,8 @@
 import {
   Home, CalendarDays, Users, Calendar, Wallet, ShieldCheck, Inbox, BarChart3, Settings,
   Bookmark, MessageSquare, ClipboardList, Sparkles, Gift, Vote, Building2, Store, SlidersHorizontal,
+  BadgeCheck, Megaphone,
+
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
