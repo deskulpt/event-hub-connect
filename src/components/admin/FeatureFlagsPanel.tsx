@@ -24,7 +24,7 @@ export const FeatureFlagsPanel = () => {
 
   if (flagsQuery.isLoading) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (flagsQuery.isError) {
-    return <EmptyState icon={Flag} title="Could not load flags" description="Refresh the page to try again." />;
+    return <EmptyState icon={<Flag className="h-6 w-6 text-primary-foreground" />} title="Could not load flags" description="Refresh the page to try again." />;
   }
 
   const flags = flagsQuery.data ?? [];
@@ -39,7 +39,7 @@ export const FeatureFlagsPanel = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           {flags.length === 0 && (
-            <EmptyState icon={Flag} title="No flags yet" description="Flags appear here once they are seeded." />
+            <EmptyState icon={<Flag className="h-6 w-6 text-primary-foreground" />} title="No flags yet" description="Flags appear here once they are seeded." />
           )}
           {flags.map((flag) => (
             <div key={flag.key} className="flex items-center justify-between gap-4 rounded-xl border p-3">
