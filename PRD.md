@@ -1,6 +1,6 @@
 # PRD — Community Engagement Platform for Adults 50+
 
-**Status:** Draft for sign-off  
+**Status:** Approved (merged to main)  
 **Document type:** Product Requirements Document (long-form)  
 **Scope of this document:** Product requirements only. No migrations, route changes, provider integrations, or admin UI are built as part of this document.  
 **Approach:** Rename-in-place. The existing application structure is reused and extended rather than rebuilt.  

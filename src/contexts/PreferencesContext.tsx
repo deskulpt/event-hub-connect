@@ -68,6 +68,7 @@ export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
     root.classList.toggle("text-scale-xlarge", accessibility.textScale === "xlarge");
     root.classList.toggle("high-contrast", accessibility.contrast === "high");
     root.classList.toggle("reduce-motion", Boolean(accessibility.reduceMotion));
+    root.classList.toggle("voice-first", Boolean(accessibility.readAloud));
     localStorage.setItem(LOCAL_KEY, JSON.stringify({ language, accessibility }));
   }, [language, accessibility]);
 
