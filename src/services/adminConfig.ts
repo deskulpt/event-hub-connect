@@ -86,3 +86,88 @@ export const recordAudit = async (entry: {
 }) => {
   await supabase.from("admin_audit_log").insert([entry]);
 };
+
+export interface CommissionRule {
+  id: string;
+  category: string;
+  rate_percent: number;
+  floor_cents: number;
+  cap_cents: number | null;
+  effective_from: string;
+  effective_to: string | null;
+  created_at: string;
+}
+
+export const listCommissionRules = async (): Promise<CommissionRule[]> => {
+  const { data, error } = await supabase
+    .from("commission_rules")
+    .select("*")
+    .order("category");
+  if (error) throw error;
+  return (data ?? []) as CommissionRule[];
+};
+
+export interface ToggleOverride {
+  id: string;
+  flag_key: string;
+  scope_kind: string;
+  scope_id: string | null;
+  enabled: boolean;
+  created_at: string;
+}
+
+export const listToggleOverrides = async (): Promise<ToggleOverride[]> => {
+  const { data, error } = await supabase
+    .from("feature_toggle_overrides")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as ToggleOverride[];
+};
+
+export interface GenerationRun {
+  id: string;
+  locality_id: string | null;
+  period: string;
+  status: string;
+  model: string | null;
+  proposals_created: number;
+  diagnostics: unknown;
+  created_at: string;
+}
+
+export const listGenerationRuns = async (): Promise<GenerationRun[]> => {
+  const { data, error } = await supabase
+    .from("proposal_generation_runs")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) throw error;
+  return (data ?? []) as GenerationRun[];
+};
+
+export const listAllLocalities = async () => {
+  const { data, error } = await supabase.from("localities").select("*").order("name");
+  if (error) throw error;
+  return data ?? [];
+};
+
+export const setLocalityActive = async (id: string, active: boolean) => {
+  const { error } = await supabase.from("localities").update({ active }).eq("id", id);
+  if (error) throw error;
+};
+
+export const setSponsorshipPackageActive = async (id: string, active: boolean) => {
+  const { error } = await supabase.from("sponsorship_packages").update({ active }).eq("id", id);
+  if (error) throw error;
+};
+
+export interface AuditEntry {
+  id: string;
+  actor_id: string | null;
+  domain: string;
+  action: string;
+  target_id: string | null;
+  reason: string | null;
+  created_at: string;
+}
