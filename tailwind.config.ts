@@ -73,17 +73,24 @@ export default {
         "2xl": "calc(var(--radius) + 8px)",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Fraunces", "Georgia", "serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        sans: ["Atkinson Hyperlegible", "system-ui", "sans-serif"],
+        display: ["Source Serif 4", "Georgia", "serif"],
+        mono: ["IBM Plex Mono", "ui-monospace", "monospace"],
       },
+      /* Solid colour fills — keep class names so legacy screens stay WCAG-safe */
       backgroundImage: {
-        "gradient-sunset": "var(--gradient-sunset)",
-        "gradient-aurora": "var(--gradient-aurora)",
-        "gradient-ocean": "var(--gradient-ocean)",
-        "gradient-mint": "var(--gradient-mint)",
-        "gradient-warm": "var(--gradient-warm)",
-        "gradient-mesh": "var(--gradient-mesh)",
+        "gradient-sunset": "none",
+        "gradient-aurora": "none",
+        "gradient-ocean": "none",
+        "gradient-mint": "none",
+        "gradient-warm": "none",
+        "gradient-mesh": "none",
+      },
+      backgroundColor: {
+        "gradient-sunset": "hsl(var(--primary))",
+        "gradient-aurora": "hsl(var(--secondary))",
+        "gradient-ocean": "hsl(var(--tertiary))",
+        "gradient-mint": "hsl(var(--success))",
       },
       boxShadow: {
         soft: "var(--shadow-soft)",

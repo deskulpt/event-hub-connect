@@ -1438,6 +1438,7 @@ export type Database = {
           latitude: number | null
           locality_id: string | null
           longitude: number | null
+          marital_status: string | null
           onboarded: boolean
           preferred_language: string
           updated_at: string

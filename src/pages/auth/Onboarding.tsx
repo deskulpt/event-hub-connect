@@ -14,6 +14,13 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { readPendingBrief, clearPendingBrief, briefToTitle, briefToEventTypeSlug } from "@/lib/pendingBrief";
+import {
+  readPendingPrefs,
+  clearPendingPrefs,
+  interestLabel,
+  MARITAL_OPTIONS,
+  type MaritalStatus,
+} from "@/lib/pendingPrefs";
 import { createEvent } from "@/services/events";
 import { listLocalities, nearestLocality } from "@/services/localities";
 import { CityAutocomplete } from "@/components/CityAutocomplete";
@@ -26,31 +33,33 @@ const AGE_BANDS = ["50-54", "55-59", "60-64", "65-69", "70-74", "75+", "under-50
 /** Steps match PRD §3.1: language → age → prefs → role/confirm */
 const STEPS = ["language", "age", "prefs", "role"] as const;
 
-const roleOptions: { id: AppRole; title: string; desc: string; icon: React.ElementType; gradient: string }[] = [
-  { id: "member", title: "I'm a Member", desc: "Discover nearby activities, vote, and join circles.", icon: Heart, gradient: "bg-gradient-mint" },
-  { id: "host", title: "I'm a Host", desc: "Plan activities for family, friends, or a group.", icon: PartyPopper, gradient: "bg-gradient-sunset" },
-  { id: "pro", title: "I'm a Pro", desc: "Instructor, guide, therapist, musician, or trainer.", icon: Briefcase, gradient: "bg-gradient-aurora" },
-  { id: "business", title: "I'm a Business", desc: "Venue, sponsor, NGO, or multi-location operator.", icon: Building2, gradient: "bg-gradient-ocean" },
+const roleOptions: { id: AppRole; title: string; desc: string; icon: React.ElementType; solid: string }[] = [
+  { id: "member", title: "I'm a Member", desc: "Discover nearby activities, vote, and join circles.", icon: Heart, solid: "bg-success" },
+  { id: "host", title: "I'm a Host", desc: "Plan activities for family, friends, or a group.", icon: PartyPopper, solid: "bg-primary" },
+  { id: "pro", title: "I'm a Pro", desc: "Instructor, guide, therapist, musician, or trainer.", icon: Briefcase, solid: "bg-secondary" },
+  { id: "business", title: "I'm a Business", desc: "Venue, sponsor, NGO, or multi-location operator.", icon: Building2, solid: "bg-tertiary" },
 ];
 
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user, refreshProfile } = useAuth();
   const brief = useMemo(() => readPendingBrief(), []);
+  const pending = useMemo(() => readPendingPrefs(), []);
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<AppRole[]>(["member"]);
   const [active, setActive] = useState<AppRole>("member");
   const [eventTitle, setEventTitle] = useState<string>(brief ? briefToTitle(brief) : "");
-  const [ageBand, setAgeBand] = useState("");
+  const [ageBand, setAgeBand] = useState(pending?.ageBand ?? "");
+  const [maritalStatus, setMaritalStatus] = useState<MaritalStatus | "">(pending?.maritalStatus ?? "");
   const [language, setLanguage] = useState<LanguageCode>("en");
-  const [city, setCity] = useState(brief?.city ?? "");
-  const [localityId, setLocalityId] = useState<string | null>(null);
-  const [interests, setInterests] = useState<string[]>([]);
+  const [city, setCity] = useState(pending?.city ?? brief?.city ?? "");
+  const [localityId, setLocalityId] = useState<string | null>(pending?.localityId ?? null);
+  const [interests, setInterests] = useState<string[]>(pending?.interests ?? []);
   const [caregiverName, setCaregiverName] = useState("");
   const [caregiverPhone, setCaregiverPhone] = useState("");
   const [accessibility, setAccessibility] = useState<AccessibilityPrefs>({
     textScale: "large",
-    contrast: "normal",
+    contrast: "high",
     reduceMotion: false,
     readAloud: false,
   });
@@ -134,6 +143,7 @@ export default function Onboarding() {
           active_role: active,
           onboarded: true,
           age_band: ageBand,
+          marital_status: maritalStatus || null,
           preferred_language: language,
           locality_id: localityId,
           interests,
@@ -163,11 +173,13 @@ export default function Onboarding() {
           user.id,
         );
         clearPendingBrief();
+        clearPendingPrefs();
         navigate(`/app/events/${ev.id}`);
         return;
       }
 
       clearPendingBrief();
+      clearPendingPrefs();
       navigate("/app");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong";
@@ -185,32 +197,29 @@ export default function Onboarding() {
     (active !== "host" || eventTitle.trim().length >= 2);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-mesh px-4 py-12">
-      <div className="orb left-[-10%] top-[-10%] h-96 w-96 bg-gradient-sunset opacity-40" />
-      <div className="orb right-[-15%] bottom-[-10%] h-[420px] w-[420px] bg-gradient-aurora opacity-30" />
-
+    <div className="relative min-h-screen bg-background px-4 py-12">
       <div className="relative mx-auto max-w-4xl">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-sunset shadow-soft">
-            <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-soft">
+            <Sparkles className="h-5 w-5" strokeWidth={2.5} aria-hidden />
           </div>
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-secondary sm:text-5xl">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             {step === 0 && <>{t("onboarding.langTitle")}</>}
             {step === 1 && <>{t("onboarding.ageTitle")}</>}
             {step === 2 && <>{t("onboarding.prefsTitle")}</>}
-            {step === 3 && <>{t("onboarding.roleTitle")} <span className="text-gradient">Vibely</span>?</>}
+            {step === 3 && <>{t("onboarding.roleTitle")} <span className="text-primary">Vibely</span>?</>}
           </h1>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-3 text-base text-muted-foreground">
             {step === 0 && t("onboarding.langSubtitle")}
             {step === 1 && t("onboarding.ageSubtitle")}
             {step === 2 && t("onboarding.prefsSubtitle")}
             {step === 3 && t("onboarding.roleSubtitle")}
           </p>
-          <div className="mt-4 flex justify-center gap-2">
+          <div className="mt-4 flex justify-center gap-2" aria-hidden>
             {STEPS.map((_, i) => (
               <span
                 key={STEPS[i]}
-                className={cn("h-1.5 w-8 rounded-full", i <= step ? "bg-primary" : "bg-border")}
+                className={cn("h-2 w-10 rounded-full", i <= step ? "bg-primary" : "bg-border")}
               />
             ))}
           </div>
@@ -245,7 +254,7 @@ export default function Onboarding() {
                 size="lg"
                 disabled={!canLeaveLanguage}
                 onClick={() => setStep(1)}
-                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
+                className="h-12 rounded-full bg-primary px-8 font-bold text-primary-foreground hover:bg-primary/90"
               >
                 {t("common.continue")} <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
@@ -255,38 +264,48 @@ export default function Onboarding() {
 
         {step === 1 && (
           <div className="bento space-y-6 p-6 sm:p-8">
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">{t("onboarding.ageBand")}</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-base font-bold text-foreground">{t("onboarding.ageBand")}</p>
+            <div className="flex flex-wrap gap-2" role="group" aria-label={t("onboarding.ageBand")}>
               {AGE_BANDS.map((band) => (
                 <button
                   key={band}
                   type="button"
                   onClick={() => setAgeBand(band)}
-                  className={cn(
-                    "min-h-11 rounded-full border px-4 py-2 text-sm tab-num transition-colors",
-                    ageBand === band
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                  )}
+                  className={cn("pref-bubble", ageBand === band && "is-selected")}
+                  aria-pressed={ageBand === band}
                 >
                   {band === "under-50" ? t("onboarding.under50") : band}
                 </button>
               ))}
             </div>
             {ageBand === "under-50" && (
-              <p className="rounded-2xl border border-accent/40 bg-accent/10 p-4 text-sm">
+              <p className="rounded-2xl border-2 border-border bg-muted p-4 text-base text-foreground">
                 {t("onboarding.caregiverPath")}
               </p>
             )}
+            <p className="text-base font-bold text-foreground">Marital status</p>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Marital status">
+              {MARITAL_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setMaritalStatus(opt.id)}
+                  className={cn("pref-bubble", maritalStatus === opt.id && "is-selected")}
+                  aria-pressed={maritalStatus === opt.id}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setStep(0)}>{t("common.back")}</Button>
               <Button
                 size="lg"
                 disabled={!canLeaveAge}
                 onClick={() => setStep(2)}
-                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
+                className="h-12 rounded-full bg-primary px-8 font-bold text-primary-foreground hover:bg-primary/90"
               >
-                {t("common.continue")} <ArrowRight className="ml-1 h-4 w-4" />
+                {t("common.continue")} <ArrowRight className="ml-1 h-4 w-4" aria-hidden />
               </Button>
             </div>
           </div>
@@ -325,7 +344,7 @@ export default function Onboarding() {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">
                 {t("onboarding.interests")} ({interests.length}/3+)
               </p>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {INTEREST_OPTIONS.map((interest) => {
                   const selectedInterest = interests.includes(interest);
                   return (
@@ -339,14 +358,10 @@ export default function Onboarding() {
                             : [...interests, interest],
                         )
                       }
-                      className={cn(
-                        "min-h-10 rounded-full border px-3 py-1 text-xs capitalize transition-colors",
-                        selectedInterest
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border/60 text-muted-foreground hover:bg-muted/50",
-                      )}
+                      className={cn("pref-bubble", selectedInterest && "is-selected")}
+                      aria-pressed={selectedInterest}
                     >
-                      {interest}
+                      {interestLabel(interest)}
                     </button>
                   );
                 })}
@@ -443,7 +458,7 @@ export default function Onboarding() {
                 size="lg"
                 disabled={!canLeavePrefs}
                 onClick={() => setStep(3)}
-                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
+                className="h-12 rounded-full bg-primary px-8 font-bold text-primary-foreground hover:bg-primary/90"
               >
                 {t("common.continue")} <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
@@ -465,17 +480,16 @@ export default function Onboarding() {
                     className={cn("bento relative cursor-pointer transition-all", isSel ? "ring-2 ring-primary" : "")}
                   >
                     <CardContent className="relative p-6">
-                      <div className={cn("orb -right-12 -top-12 h-40 w-40", r.gradient)} />
-                      <div className={cn("relative flex h-12 w-12 items-center justify-center rounded-2xl shadow-soft", r.gradient)}>
-                        <Icon className="h-6 w-6 text-primary-foreground" strokeWidth={2.2} />
+                      <div className={cn("relative flex h-12 w-12 items-center justify-center rounded-2xl text-primary-foreground shadow-soft", r.solid)}>
+                        <Icon className="h-6 w-6" strokeWidth={2.2} aria-hidden />
                       </div>
                       {isSel && (
                         <div className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft">
-                          <Check className="h-4 w-4" strokeWidth={3} />
+                          <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
                         </div>
                       )}
-                      <h3 className="mt-4 font-display text-lg font-semibold text-secondary">{r.title}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{r.desc}</p>
+                      <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{r.title}</h3>
+                      <p className="mt-1 text-base text-muted-foreground">{r.desc}</p>
                       {isSel && (
                         <button
                           type="button"
@@ -533,7 +547,7 @@ export default function Onboarding() {
                 size="lg"
                 onClick={finish}
                 disabled={loading || !canFinish}
-                className="h-12 rounded-full bg-gradient-sunset px-8 font-semibold text-primary-foreground"
+                className="h-12 rounded-full bg-primary px-8 font-bold text-primary-foreground hover:bg-primary/90"
               >
                 {loading
                   ? t("common.loading")
