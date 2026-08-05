@@ -49,12 +49,16 @@ import Inbox from "./pages/app/Inbox";
 import Insights from "./pages/app/Insights";
 import Settings from "./pages/app/settings/Settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { RequireStaff } from "./components/RequireStaff";
+import { PreferencesProvider } from "./contexts/PreferencesContext";
 import { Circles } from "./pages/app/circles/Circles";
 import { Proposals } from "./pages/app/proposals/Proposals";
 import { Perks } from "./pages/app/perks/Perks";
 import { ManagePerks } from "./pages/app/perks/ManagePerks";
 import { Memorabilia } from "./pages/app/memorabilia/Memorabilia";
 import { Orgs } from "./pages/app/orgs/Orgs";
+import { Admin } from "./pages/app/admin/Admin";
+
 
 const queryClient = new QueryClient();
 
