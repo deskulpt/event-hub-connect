@@ -69,6 +69,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PreferencesProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -84,6 +85,7 @@ const App = () => (
               <Route path="perks/manage" element={<ManagePerks />} />
               <Route path="memorabilia" element={<Memorabilia />} />
               <Route path="orgs" element={<Orgs />} />
+              <Route path="admin" element={<RequireStaff><Admin /></RequireStaff>} />
               <Route path="events" element={<AllEvents />} />
               <Route path="events/new" element={<EventNew />} />
               <Route path="events/:id" element={<EventDetail />} />
@@ -125,6 +127,7 @@ const App = () => (
             <Route path="/app/*" element={<Navigate to="/app" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </PreferencesProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
