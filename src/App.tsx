@@ -49,12 +49,18 @@ import Inbox from "./pages/app/Inbox";
 import Insights from "./pages/app/Insights";
 import Settings from "./pages/app/settings/Settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { RequireStaff } from "./components/RequireStaff";
+import { PreferencesProvider } from "./contexts/PreferencesContext";
 import { Circles } from "./pages/app/circles/Circles";
 import { Proposals } from "./pages/app/proposals/Proposals";
 import { Perks } from "./pages/app/perks/Perks";
 import { ManagePerks } from "./pages/app/perks/ManagePerks";
 import { Memorabilia } from "./pages/app/memorabilia/Memorabilia";
 import { Orgs } from "./pages/app/orgs/Orgs";
+import { Admin } from "./pages/app/admin/Admin";
+import { Credentials } from "./pages/app/trust/Credentials";
+import { Sponsorship } from "./pages/app/sponsorship/Sponsorship";
+
 
 const queryClient = new QueryClient();
 
@@ -65,6 +71,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PreferencesProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -80,6 +87,7 @@ const App = () => (
               <Route path="perks/manage" element={<ManagePerks />} />
               <Route path="memorabilia" element={<Memorabilia />} />
               <Route path="orgs" element={<Orgs />} />
+              <Route path="admin" element={<RequireStaff><Admin /></RequireStaff>} />
               <Route path="events" element={<AllEvents />} />
               <Route path="events/new" element={<EventNew />} />
               <Route path="events/:id" element={<EventDetail />} />
@@ -108,6 +116,8 @@ const App = () => (
               <Route path="finance/pnl" element={<Pnl />} />
               <Route path="finance/integrations" element={<Integrations />} />
               <Route path="trust" element={<Verification />} />
+              <Route path="trust/credentials" element={<Credentials />} />
+              <Route path="sponsorship" element={<Sponsorship />} />
               <Route path="trust/insurance" element={<Insurance />} />
               <Route path="trust/reviews" element={<Reviews />} />
               <Route path="trust/disputes" element={<Disputes />} />
@@ -121,6 +131,7 @@ const App = () => (
             <Route path="/app/*" element={<Navigate to="/app" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </PreferencesProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

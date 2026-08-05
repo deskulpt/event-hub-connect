@@ -1,6 +1,8 @@
 import {
   Home, CalendarDays, Users, Calendar, Wallet, ShieldCheck, Inbox, BarChart3, Settings,
   Bookmark, MessageSquare, ClipboardList, Sparkles, Gift, Vote, Building2, Store, SlidersHorizontal,
+  BadgeCheck, Megaphone,
+
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -40,6 +42,7 @@ const professionalNav: NavItem[] = [
   { title: "Perks I offer", url: "/app/perks/manage", icon: Gift },
   { title: "Billing", url: "/app/finance", icon: Wallet },
   { title: "Trust", url: "/app/trust", icon: ShieldCheck },
+  { title: "Credentials", url: "/app/trust/credentials", icon: BadgeCheck },
   { title: "Inbox", url: "/app/inbox", icon: Inbox },
   { title: "Settings", url: "/app/settings", icon: Settings },
 ];
@@ -52,6 +55,7 @@ const orgNav: NavItem[] = [
   { title: "Perks I offer", url: "/app/perks/manage", icon: Gift },
   { title: "Operations", url: "/app/crm/tasks", icon: ClipboardList },
   { title: "Billing", url: "/app/finance", icon: Wallet },
+  { title: "Sponsorship", url: "/app/sponsorship", icon: Megaphone },
   { title: "Insights", url: "/app/insights", icon: BarChart3 },
   { title: "Inbox", url: "/app/inbox", icon: Inbox },
   { title: "Settings", url: "/app/settings", icon: Settings },
