@@ -38,6 +38,11 @@ export interface EventRecord {
   accessibility_attributes?: string[];
   language?: string | null;
   indoor_outdoor?: string | null;
+  min_attendance?: number | null;
+  attended_count?: number | null;
+  no_show_count?: number | null;
+  feedback_rating?: number | null;
+  feedback_notes?: string | null;
 }
 
 export const eventBriefSchema = z.object({

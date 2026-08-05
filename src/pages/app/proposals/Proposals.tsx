@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Vote, Sparkles } from "lucide-react";
@@ -32,10 +33,12 @@ export const Proposals = () => {
   const { localityId, t } = usePreferences();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [widen, setWiden] = useState(false);
+  const effectiveLocality = widen ? null : localityId;
 
   const proposalsQuery = useQuery({
-    queryKey: ["proposals", localityId],
-    queryFn: () => listProposals(localityId),
+    queryKey: ["proposals", effectiveLocality],
+    queryFn: () => listProposals(effectiveLocality),
   });
   const votesQuery = useQuery({
     queryKey: ["my-votes", user?.id],
@@ -105,9 +108,16 @@ export const Proposals = () => {
           title="No proposals yet this month"
           description="Once enough neighbours join your area, we generate a fresh slate of activity ideas to vote on."
           action={
-            <Button className="rounded-full" onClick={() => navigate("/app/circles")}>
-              Browse circles
-            </Button>
+            <div className="flex flex-wrap justify-center gap-2">
+              {!widen && (
+                <Button className="rounded-full" onClick={() => setWiden(true)}>
+                  Widen area
+                </Button>
+              )}
+              <Button variant="outline" className="rounded-full" onClick={() => navigate("/app/circles")}>
+                Browse circles
+              </Button>
+            </div>
           }
         />
       )}
