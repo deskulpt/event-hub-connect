@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { EventBriefInput, EventRecord } from "@/types/event";
+import type { EventBriefInput, EventRecord, EventStatus } from "@/types/event";
 
 const dollarsToCents = (dollars: number | null | undefined): number | null => {
   if (dollars === null || dollars === undefined || Number.isNaN(dollars) || (dollars as unknown) === "") return null;
@@ -54,6 +54,47 @@ export const updateEvent = async (id: string, input: EventBriefInput): Promise<E
 export const deleteEvent = async (id: string): Promise<void> => {
   const { error } = await supabase.from("events").delete().eq("id", id);
   if (error) throw error;
+};
+
+export const updateEventStatus = async (id: string, status: EventStatus): Promise<EventRecord> => {
+  const { data, error } = await supabase.from("events").update({ status }).eq("id", id).select("*").single();
+  if (error) throw error;
+  return data as EventRecord;
+};
+
+export const captureAttendance = async (
+  id: string,
+  input: { attended_count: number; no_show_count?: number },
+): Promise<EventRecord> => {
+  const { data, error } = await supabase
+    .from("events")
+    .update({
+      attended_count: input.attended_count,
+      no_show_count: input.no_show_count ?? null,
+      status: "completed",
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as EventRecord;
+};
+
+export const submitEventFeedback = async (
+  id: string,
+  input: { feedback_rating: number; feedback_notes?: string },
+): Promise<EventRecord> => {
+  const { data, error } = await supabase
+    .from("events")
+    .update({
+      feedback_rating: input.feedback_rating,
+      feedback_notes: input.feedback_notes ?? null,
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as EventRecord;
 };
 
 export const countActiveEvents = async (ownerId: string): Promise<number> => {
