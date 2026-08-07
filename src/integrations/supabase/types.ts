@@ -2058,6 +2058,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_circle_member: {
+        Args: { _circle_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_moderator: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
