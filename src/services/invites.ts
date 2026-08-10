@@ -44,7 +44,11 @@ export const uploadInviteImage = async (userId: string, eventId: string, file: F
   const path = `${userId}/${eventId}-${Date.now()}.${ext}`;
   const { error } = await supabase.storage.from("invites").upload(path, file, { upsert: true, contentType: file.type });
   if (error) throw error;
-  return supabase.storage.from("invites").getPublicUrl(path).data.publicUrl;
+  const { data, error: signErr } = await supabase.storage
+    .from("invites")
+    .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+  if (signErr) throw signErr;
+  return data.signedUrl;
 };
 
 export const startAiCall = async (input: {

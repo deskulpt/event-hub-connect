@@ -96,8 +96,10 @@ Deno.serve(async (req) => {
             const path = `${user.id}/${event_id}-${Date.now()}.${ext}`;
             const { error: upErr } = await service.storage.from("invites").upload(path, bin, { contentType: mime, upsert: true });
             if (!upErr) {
-              const { data: pub } = service.storage.from("invites").getPublicUrl(path);
-              finalImageUrl = pub.publicUrl;
+              const { data: signed } = await service.storage
+                .from("invites")
+                .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+              if (signed?.signedUrl) finalImageUrl = signed.signedUrl;
             }
           }
         }
