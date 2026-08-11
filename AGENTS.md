@@ -11,7 +11,9 @@ See `package.json` scripts:
 - `npm run lint` / `npm test` / `npm run build`
 
 ### Supabase
-- Project ref and URL/keys are in `.env` (`VITE_SUPABASE_*`) and `supabase/config.toml`.
+- Active project ref: `tfzzexodasqdzsrixnmg` (`supabase/config.toml` + `.env`).
+- Put real API keys in **`.env.local`** (gitignored via `*.local`) or inject `VITE_SUPABASE_PUBLISHABLE_KEY` as a Cloud secret. Vite prefers process env over `.env` files.
+- Prefer the **publishable/anon** key for the browser client — do not commit `sb_secret_*` / service-role keys.
 - App talks to the cloud project; do not assume `supabase start` is needed.
 - DB password (if provided as a secret) connects via the **session pooler**:
   `postgresql://postgres.<project-ref>:<password>@aws-1-us-west-2.pooler.supabase.com:5432/postgres`
