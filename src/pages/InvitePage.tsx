@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BentoCard, GradientOrb } from "@/components/shell/Bento";
+import { Seo } from "@/components/Seo";
 import { getInviteBySlug } from "@/services/invites";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -52,6 +53,24 @@ export default function InvitePage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-mesh px-4 py-10">
+      <Seo
+        title={`${invite.headline ?? "You're invited"} — Evntr invite`}
+        description={(invite.copy ?? `You're invited${event?.title ? ` to ${event.title}` : ""}${event?.city ? ` in ${event.city}` : ""}. Open the invite for date, location and details.`).slice(0, 155)}
+        path={`/i/${slug}`}
+        jsonLd={
+          event
+            ? {
+                "@context": "https://schema.org",
+                "@type": "Event",
+                name: event.title ?? invite.headline ?? "Event",
+                ...(event.event_date ? { startDate: event.event_date } : {}),
+                ...(event.city ? { location: { "@type": "Place", name: event.city, address: event.city } } : {}),
+                eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+                url: `https://eventful-makers.lovable.app/i/${slug}`,
+              }
+            : undefined
+        }
+      />
       <div className="orb left-[-15%] top-[-10%] h-[480px] w-[480px] bg-gradient-sunset opacity-30" />
       <div className="orb bottom-[-20%] right-[-10%] h-[520px] w-[520px] bg-gradient-aurora opacity-25" />
 

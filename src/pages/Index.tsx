@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ShieldCheck, Sparkles } from "lucide-react";
+import { Seo } from "@/components/Seo";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HeroBriefSheet } from "@/components/landing/HeroBriefSheet";
@@ -20,6 +21,24 @@ const Index = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <Seo
+        title="Evntr — Plan any gathering, beautifully booked"
+        description="Find venues, chefs, artists and at-home experiences for events from 2 to 500+ guests. Build a brief and get matched in 60 seconds."
+        path="/"
+        jsonLd={[
+          { "@context": "https://schema.org", "@type": "Organization", name: "Evntr", url: "https://eventful-makers.lovable.app/" },
+          { "@context": "https://schema.org", "@type": "WebSite", name: "Evntr", url: "https://eventful-makers.lovable.app/" },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              { "@type": "Question", name: "How does Evntr planning work?", acceptedAnswer: { "@type": "Answer", text: "Tell us your event type, guests, date and city. Evntr turns it into a structured brief, then ranks venues and pros with a Fit Score." } },
+              { "@type": "Question", name: "What kinds of events can I plan?", acceptedAnswer: { "@type": "Answer", text: "Anything from a dinner for two to a wedding for two hundred, including venues, chefs, artists, photographers, DJs and planners." } },
+              { "@type": "Question", name: "Is Evntr free to start?", acceptedAnswer: { "@type": "Answer", text: "Yes. Creating a brief and browsing matched venues and professionals is free." } },
+            ],
+          },
+        ]}
+      />
       <SiteHeader scrolled={scrolled} />
 
       <main className="flex-1">
