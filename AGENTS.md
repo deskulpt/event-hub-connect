@@ -19,6 +19,7 @@ See `package.json` scripts:
   `postgresql://postgres.<project-ref>:<password>@aws-1-us-west-2.pooler.supabase.com:5432/postgres`
   Direct `db.<ref>.supabase.co` may only resolve to IPv6 and fail in this environment.
 - SQL migrations are in `supabase/migrations/`. Apply with `psql -f …` against the pooler when needed.
+- Full audit notes: `supabase/MIGRATION_AUDIT.md`. Realtime policies on `realtime.messages` must be applied via the Supabase SQL Editor (pooler `postgres` role is not table owner).
 
 ### Lint note
 `npm run lint` currently reports a few pre-existing errors in shadcn/ui and `tailwind.config.ts`; that is existing repo debt, not an environment failure.

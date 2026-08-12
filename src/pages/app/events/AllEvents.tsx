@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { listEvents } from "@/services/events";
 import type { EventStatus } from "@/types/event";
 import { ACCESSIBILITY_ATTRIBUTES } from "@/types/community";
+import { usePreferences } from "@/contexts/PreferencesContext";
 
 const statusVariant: Record<EventStatus, "default" | "secondary" | "outline"> = {
   draft: "outline",
@@ -32,10 +33,12 @@ const formatDate = (date: string | null) => {
 
 export default function AllEvents() {
   const navigate = useNavigate();
+  const { localityId } = usePreferences();
   const { data: events, isLoading, error } = useQuery({ queryKey: ["events"], queryFn: listEvents });
   const [language, setLanguage] = useState("all");
   const [indoorOutdoor, setIndoorOutdoor] = useState("all");
   const [accessFilter, setAccessFilter] = useState("all");
+  const [localityOnly, setLocalityOnly] = useState(false);
 
   const languages = useMemo(() => {
     const set = new Set<string>();
@@ -46,6 +49,7 @@ export default function AllEvents() {
   }, [events]);
 
   const filtered = (events ?? []).filter((e) => {
+    if (localityOnly && localityId && e.locality_id !== localityId) return false;
     if (language !== "all" && (e.language ?? "en") !== language) return false;
     if (indoorOutdoor !== "all" && (e.indoor_outdoor ?? "") !== indoorOutdoor) return false;
     if (
@@ -70,6 +74,18 @@ export default function AllEvents() {
       />
 
       <div className="flex flex-wrap gap-1.5">
+        {localityId && (
+          <button
+            type="button"
+            onClick={() => setLocalityOnly((v) => !v)}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              localityOnly ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"
+            }`}
+            aria-pressed={localityOnly}
+          >
+            {localityOnly ? "My locality" : "All localities"}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setLanguage("all")}

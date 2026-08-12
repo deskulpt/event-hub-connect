@@ -21,6 +21,7 @@ import { FitRing } from "@/components/marketplace/FitRing";
 import { ListingCover } from "@/components/marketplace/ListingCover";
 import { NearbyPlacesStrip } from "@/components/marketplace/NearbyPlacesStrip";
 import { CityAutocomplete } from "@/components/CityAutocomplete";
+import { TrustBadge } from "@/components/trust/TrustBadge";
 
 const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 
@@ -219,6 +220,7 @@ export default function Discover() {
                             <span>·</span>
                             <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {row.city ?? "—"}</span>
                           </p>
+                          <TrustBadge state={row.verification_state ?? "unverified"} className="mt-1" />
                         </div>
                         <FitRing score={fit.total} size={48} />
                       </div>
