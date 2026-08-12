@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Seo } from "@/components/Seo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -62,6 +63,12 @@ export default function Auth() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-mesh px-4 py-12">
+      <Seo
+        title="Sign in or create an account — Evntr"
+        description="Log in to Evntr or create a free account to plan events, send inquiries to venues and pros, and manage bookings in one place."
+        path="/auth"
+        noindex
+      />
       <div className="orb left-[-10%] top-[-10%] h-96 w-96 bg-gradient-sunset opacity-40" />
       <div className="orb bottom-[-15%] right-[-10%] h-96 w-96 bg-gradient-aurora opacity-30" />
 
@@ -70,7 +77,7 @@ export default function Auth() {
           <Link to="/" className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-sunset shadow-soft">
             <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
           </Link>
-          <CardTitle className="font-display text-2xl">Welcome to Vibely</CardTitle>
+          <CardTitle asChild className="font-display text-2xl"><h1>Welcome to Vibely</h1></CardTitle>
           <CardDescription>Plan, book, and run events in one place.</CardDescription>
         </CardHeader>
         <CardContent>

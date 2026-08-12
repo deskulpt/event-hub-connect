@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Seo } from "@/components/Seo";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 
@@ -24,9 +25,15 @@ export default function ResetPassword() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/20 px-4">
+      <Seo
+        title="Reset your password — Evntr"
+        description="Set a new password for your Evntr account and get back to planning your events."
+        path="/reset-password"
+        noindex
+      />
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Set a new password</CardTitle>
+          <CardTitle asChild><h1>Reset your password</h1></CardTitle>
           <CardDescription>Enter and confirm your new password.</CardDescription>
         </CardHeader>
         <CardContent>

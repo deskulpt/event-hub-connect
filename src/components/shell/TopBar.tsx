@@ -46,7 +46,7 @@ export const TopBar = () => {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border/40 bg-background/60 px-3 backdrop-blur-xl md:px-6">
-      <SidebarTrigger className="hover:bg-muted/60" />
+      <SidebarTrigger aria-label="Toggle navigation sidebar" className="hover:bg-muted/60" />
       {hasMultipleRoles ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -97,7 +97,7 @@ export const TopBar = () => {
           <Sparkles className="h-4 w-4" />
           <span className="hidden sm:inline">Ask AI</span>
         </Button>
-        <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full">
+        <Button variant="ghost" size="icon" aria-label="View notifications" className="relative h-9 w-9 rounded-full">
           <Bell className="h-4 w-4" />
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary animate-pulse-soft" />
         </Button>
@@ -106,7 +106,7 @@ export const TopBar = () => {
         <QuickCreate />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full ring-1 ring-border/60 hover:ring-primary/40">
+            <Button variant="ghost" size="icon" aria-label="Open profile menu" className="h-9 w-9 rounded-full ring-1 ring-border/60 hover:ring-primary/40">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-gradient-sunset text-xs text-primary-foreground font-semibold">{initials}</AvatarFallback>
               </Avatar>
