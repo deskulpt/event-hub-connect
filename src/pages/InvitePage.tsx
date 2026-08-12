@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BentoCard, GradientOrb } from "@/components/shell/Bento";
+import { Seo } from "@/components/Seo";
 import { getInviteBySlug } from "@/services/invites";
 import { supabase } from "@/integrations/supabase/client";
 
