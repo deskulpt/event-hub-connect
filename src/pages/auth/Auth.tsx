@@ -77,7 +77,7 @@ export default function Auth() {
           <Link to="/" className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-sunset shadow-soft">
             <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
           </Link>
-          <CardTitle asChild className="font-display text-2xl"><h1>Welcome to Vibely</h1></CardTitle>
+          <h1 className="font-display text-2xl font-semibold leading-none tracking-tight">Welcome to Vibely</h1>
           <CardDescription>Plan, book, and run events in one place.</CardDescription>
         </CardHeader>
         <CardContent>

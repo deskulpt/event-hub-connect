@@ -33,7 +33,7 @@ export default function ResetPassword() {
       />
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle asChild><h1>Reset your password</h1></CardTitle>
+          <h1 className="font-display text-base font-semibold leading-none tracking-tight">Reset your password</h1>
           <CardDescription>Enter and confirm your new password.</CardDescription>
         </CardHeader>
         <CardContent>
