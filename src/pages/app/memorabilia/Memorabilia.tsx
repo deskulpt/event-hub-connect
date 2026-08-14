@@ -31,8 +31,12 @@ export const Memorabilia = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [localityOnly, setLocalityOnly] = useState(Boolean(localityId));
 
-  const listingsQuery = useQuery({ queryKey: ["memorabilia"], queryFn: listMemorabilia });
+  const listingsQuery = useQuery({
+    queryKey: ["memorabilia", localityOnly ? localityId : "all"],
+    queryFn: () => listMemorabilia(localityOnly ? localityId : null),
+  });
 
   const create = useMutation({
     mutationFn: () =>
@@ -106,6 +110,29 @@ export const Memorabilia = () => {
           </Dialog>
         }
       />
+
+      {localityId && (
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            type="button"
+            onClick={() => setLocalityOnly(false)}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              !localityOnly ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"
+            }`}
+          >
+            All areas
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocalityOnly(true)}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              localityOnly ? "border-primary bg-primary/10 text-primary" : "border-border/60 text-muted-foreground"
+            }`}
+          >
+            My locality
+          </button>
+        </div>
+      )}
 
       {listingsQuery.isLoading && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

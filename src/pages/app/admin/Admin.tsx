@@ -34,11 +34,14 @@ import {
   updateAiSetting,
   updateLanguage,
   updateLocalityActive,
+  upsertGenerationRule,
   upsertModerationSetting,
 } from "@/services/adminConfig";
 import { decideReport, listReports, setOrganizationStatus, triageReport } from "@/services/organizations";
 import { generateProposals } from "@/services/proposals";
 import { TrustBadge } from "@/components/trust/TrustBadge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export const Admin = () => {
   const { user } = useAuth();
@@ -47,6 +50,12 @@ export const Admin = () => {
   const [commissionCategory, setCommissionCategory] = useState("default");
   const [commissionRate, setCommissionRate] = useState("10");
   const [genLocalityId, setGenLocalityId] = useState("");
+  const [ruleLocalityId, setRuleLocalityId] = useState("");
+  const [ruleSlate, setRuleSlate] = useState("5");
+  const [ruleMinThreshold, setRuleMinThreshold] = useState("3");
+  const [ruleMultiplier, setRuleMultiplier] = useState("1.5");
+  const [ruleWindow, setRuleWindow] = useState("7");
+  const [ruleEnabled, setRuleEnabled] = useState(true);
 
   const flagsQ = useQuery({ queryKey: ["admin-flags"], queryFn: listFeatureFlags });
   const aiQ = useQuery({ queryKey: ["admin-ai"], queryFn: listAiSettings });
@@ -186,6 +195,24 @@ export const Admin = () => {
     onError: () => toast.error("Proposal generation failed"),
   });
 
+  const saveRule = useMutation({
+    mutationFn: () =>
+      upsertGenerationRule(ruleLocalityId, {
+        slate_size: Number(ruleSlate) || 5,
+        min_threshold: Number(ruleMinThreshold) || 3,
+        threshold_multiplier: Number(ruleMultiplier) || 1.5,
+        voting_window_days: Number(ruleWindow) || 7,
+        enabled: ruleEnabled,
+        auto_publish: false,
+      }),
+    onSuccess: async () => {
+      await audit("generation_rules", "upsert", ruleLocalityId);
+      void queryClient.invalidateQueries({ queryKey: ["admin-rules"] });
+      toast.success("Generation rule saved");
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Could not save rule"),
+  });
+
   const saveMod = useMutation({
     mutationFn: () => upsertModerationSetting("auto_triage", { enabled: true }),
     onSuccess: () => {
@@ -193,6 +220,12 @@ export const Admin = () => {
       toast.success("Moderation setting saved");
     },
   });
+
+  const localityNameById = (id: string | null | undefined) => {
+    if (!id) return "global";
+    const match = (localitiesQ.data ?? []).find((l) => l.id === id);
+    return match?.name ?? `${id.slice(0, 8)}…`;
+  };
 
   return (
     <PageLayout>
@@ -375,19 +408,107 @@ export const Admin = () => {
         </TabsContent>
 
         <TabsContent value="rules" className="space-y-3">
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle className="text-base">Edit generation rule</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1.5">
+                <Label>Locality</Label>
+                <Select value={ruleLocalityId} onValueChange={setRuleLocalityId}>
+                  <SelectTrigger aria-label="Rule locality">
+                    <SelectValue placeholder="Select locality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(localitiesQ.data ?? []).map((loc) => (
+                      <SelectItem key={loc.id} value={loc.id}>
+                        {loc.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Slate size"
+                  value={ruleSlate}
+                  onChange={(e) => setRuleSlate(e.target.value)}
+                  aria-label="Slate size"
+                />
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Min threshold"
+                  value={ruleMinThreshold}
+                  onChange={(e) => setRuleMinThreshold(e.target.value)}
+                  aria-label="Min threshold"
+                />
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="Multiplier"
+                  value={ruleMultiplier}
+                  onChange={(e) => setRuleMultiplier(e.target.value)}
+                  aria-label="Threshold multiplier"
+                />
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Voting window days"
+                  value={ruleWindow}
+                  onChange={(e) => setRuleWindow(e.target.value)}
+                  aria-label="Voting window days"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Switch checked={ruleEnabled} onCheckedChange={setRuleEnabled} id="rule-enabled" />
+                  <Label htmlFor="rule-enabled">Enabled</Label>
+                </div>
+                <Button
+                  className="rounded-full"
+                  disabled={!ruleLocalityId || saveRule.isPending}
+                  onClick={() => saveRule.mutate()}
+                >
+                  {saveRule.isPending ? "Saving…" : "Save rule"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
           {(rulesQ.data ?? []).map((rule) => (
             <Card key={rule.id} className="rounded-2xl">
-              <CardContent className="p-4 text-sm">
-                <p className="font-medium">Locality {rule.locality_id?.slice(0, 8) ?? "global"}</p>
-                <p className="text-muted-foreground tab-num">
-                  slate {rule.slate_size} · min threshold {rule.min_threshold} · multiplier{" "}
-                  {rule.threshold_multiplier} · window {rule.voting_window_days}d
-                </p>
+              <CardContent className="flex items-center justify-between gap-3 p-4 text-sm">
+                <div>
+                  <p className="font-medium">{localityNameById(rule.locality_id)}</p>
+                  <p className="text-muted-foreground tab-num">
+                    slate {rule.slate_size} · min threshold {rule.min_threshold} · multiplier{" "}
+                    {rule.threshold_multiplier} · window {rule.voting_window_days}d
+                    {rule.enabled ? "" : " · disabled"}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={() => {
+                    if (rule.locality_id) setRuleLocalityId(rule.locality_id);
+                    setRuleSlate(String(rule.slate_size));
+                    setRuleMinThreshold(String(rule.min_threshold));
+                    setRuleMultiplier(String(rule.threshold_multiplier));
+                    setRuleWindow(String(rule.voting_window_days));
+                    setRuleEnabled(rule.enabled);
+                  }}
+                >
+                  Edit
+                </Button>
               </CardContent>
             </Card>
           ))}
           {rulesQ.isSuccess && (rulesQ.data ?? []).length === 0 && (
-            <EmptyState title="No generation rules" description="Rules appear per locality when configured." />
+            <EmptyState title="No generation rules" description="Pick a locality above and save a rule." />
           )}
         </TabsContent>
 
@@ -506,11 +627,18 @@ export const Admin = () => {
 
         <TabsContent value="runs" className="space-y-3">
           <div className="flex flex-wrap gap-2">
-            <Input
-              placeholder="Locality id to generate"
-              value={genLocalityId}
-              onChange={(e) => setGenLocalityId(e.target.value)}
-            />
+            <Select value={genLocalityId} onValueChange={setGenLocalityId}>
+              <SelectTrigger className="w-64" aria-label="Generate for locality">
+                <SelectValue placeholder="Select locality" />
+              </SelectTrigger>
+              <SelectContent>
+                {(localitiesQ.data ?? []).map((loc) => (
+                  <SelectItem key={loc.id} value={loc.id}>
+                    {loc.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button
               className="rounded-full"
               disabled={!genLocalityId.trim() || runProposals.isPending}

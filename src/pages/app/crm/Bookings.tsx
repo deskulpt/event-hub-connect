@@ -12,17 +12,45 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { NewBookingDialog } from "@/components/crm/NewBookingDialog";
-import { listBookingsAsHost, listBookingsAsProvider, updateBookingStatus } from "@/services/bookings";
+import {
+  getDepositState,
+  listBookingsAsHost,
+  listBookingsAsProvider,
+  markDepositPaid,
+  markDepositRefunded,
+  updateBookingStatus,
+} from "@/services/bookings";
 import type { BookingRecord, BookingStatus } from "@/types/booking";
+import { Link } from "react-router-dom";
 
 const statusVariant: Record<BookingStatus, "default" | "secondary" | "outline"> = {
   pending: "secondary", confirmed: "default", in_progress: "default",
   completed: "outline", cancelled: "outline", refunded: "outline",
 };
 
-const Row = ({ b, side, onUpdate }: { b: BookingRecord; side: "host" | "provider"; onUpdate: (id: string, s: BookingStatus) => void }) => {
+const depositLabel = {
+  none: "No deposit",
+  unpaid: "Deposit unpaid",
+  paid: "Deposit paid",
+  refunded: "Deposit refunded",
+} as const;
+
+const Row = ({
+  b,
+  side,
+  onUpdate,
+  onDepositPaid,
+  onDepositRefunded,
+}: {
+  b: BookingRecord;
+  side: "host" | "provider";
+  onUpdate: (id: string, s: BookingStatus) => void;
+  onDepositPaid: (id: string) => void;
+  onDepositRefunded: (id: string) => void;
+}) => {
   const dep = b.deposit_cents ? `$${(b.deposit_cents / 100).toLocaleString()}` : "—";
   const tot = b.total_cents ? `$${(b.total_cents / 100).toLocaleString()}` : "—";
+  const depositState = getDepositState(b);
   return (
     <div className="flex flex-col gap-2 rounded-md border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="space-y-1">
@@ -30,18 +58,39 @@ const Row = ({ b, side, onUpdate }: { b: BookingRecord; side: "host" | "provider
           <span className="text-sm font-medium">{b.title}</span>
           <Badge variant={statusVariant[b.status]} className="capitalize text-[10px]">{b.status.replace("_", " ")}</Badge>
           <Badge variant="outline" className="capitalize text-[10px]">{b.provider_kind}</Badge>
+          <Badge
+            variant={depositState === "paid" ? "default" : "secondary"}
+            className="rounded-full text-[10px]"
+          >
+            {depositLabel[depositState]}
+          </Badge>
         </div>
         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground tabular-nums">
           {b.event_date && <span>{format(parseISO(b.event_date), "MMM d, yyyy")}</span>}
           <span>Deposit {dep}</span>
           <span>Total {tot}</span>
+          {b.inquiry_id && (
+            <Link to="/app/crm/inquiries" className="text-primary underline-offset-2 hover:underline">
+              From inquiry
+            </Link>
+          )}
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {side === "provider" && b.status === "pending" && (
           <Button size="sm" variant="outline" onClick={() => onUpdate(b.id, "confirmed")}>Confirm</Button>
         )}
-        {b.status !== "completed" && b.status !== "cancelled" && (
+        {depositState === "unpaid" && (
+          <Button size="sm" variant="secondary" onClick={() => onDepositPaid(b.id)}>
+            Mark deposit paid
+          </Button>
+        )}
+        {depositState === "paid" && (
+          <Button size="sm" variant="outline" onClick={() => onDepositRefunded(b.id)}>
+            Refund deposit
+          </Button>
+        )}
+        {b.status !== "completed" && b.status !== "cancelled" && b.status !== "refunded" && (
           <Button size="sm" variant="ghost" onClick={() => onUpdate(b.id, "cancelled")}>Cancel</Button>
         )}
       </div>
@@ -70,6 +119,30 @@ export default function Bookings() {
     onError: (e: Error) => toast.error(e.message ?? "Update failed"),
   });
 
+  const depositPaidMut = useMutation({
+    mutationFn: (id: string) => markDepositPaid(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Deposit marked paid — booking confirmed");
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Could not update deposit"),
+  });
+
+  const depositRefundMut = useMutation({
+    mutationFn: (id: string) => markDepositRefunded(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["bookings"] });
+      toast.success("Deposit refunded");
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Could not refund deposit"),
+  });
+
+  const rowProps = {
+    onUpdate: (id: string, status: BookingStatus) => updateMut.mutate({ id, status }),
+    onDepositPaid: (id: string) => depositPaidMut.mutate(id),
+    onDepositRefunded: (id: string) => depositRefundMut.mutate(id),
+  };
+
   return (
     <PageLayout>
       <PageHeader
@@ -92,7 +165,7 @@ export default function Bookings() {
                   title="No bookings yet" description="Create a booking from a replied inquiry or use New booking above."
                   action={<NewBookingDialog />} />
               ) : (hostQ.data ?? []).map((b) => (
-                <Row key={b.id} b={b} side="host" onUpdate={(id, status) => updateMut.mutate({ id, status })} />
+                <Row key={b.id} b={b} side="host" {...rowProps} />
               ))}
           </CardContent></Card>
         </TabsContent>
@@ -104,7 +177,7 @@ export default function Bookings() {
                 <EmptyState icon={<Inbox className="h-5 w-5 text-primary" />}
                   title="No bookings against you" description="When hosts confirm bookings, they appear here." />
               ) : (provQ.data ?? []).map((b) => (
-                <Row key={b.id} b={b} side="provider" onUpdate={(id, status) => updateMut.mutate({ id, status })} />
+                <Row key={b.id} b={b} side="provider" {...rowProps} />
               ))}
           </CardContent></Card>
         </TabsContent>

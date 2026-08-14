@@ -25,6 +25,7 @@ export const OrgDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [memberId, setMemberId] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
 
   const orgQuery = useQuery({
     queryKey: ["organization", id],
@@ -42,13 +43,14 @@ export const OrgDetail = () => {
   const isOwner = Boolean(user && org?.owner_id === user.id);
 
   const invite = useMutation({
-    mutationFn: () => inviteOrgMember(id!, memberId.trim()),
+    mutationFn: () => inviteOrgMember(id!, inviteEmail.trim() || memberId.trim()),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["org-members", id] });
       setMemberId("");
+      setInviteEmail("");
       toast.success("Member added");
     },
-    onError: () => toast.error("Could not add member. Check the user id."),
+    onError: (e: Error) => toast.error(e.message || "Could not add member. Check the email or user id."),
   });
 
   const remove = useMutation({
@@ -147,20 +149,29 @@ export const OrgDetail = () => {
               </div>
             ))}
             {isOwner && (
-              <div className="flex gap-2 pt-2">
+              <div className="space-y-2 pt-2">
                 <Input
-                  placeholder="Member user id (uuid)"
-                  value={memberId}
-                  onChange={(e) => setMemberId(e.target.value)}
-                  aria-label="Member user id"
+                  type="email"
+                  placeholder="Member email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  aria-label="Member email"
                 />
-                <Button
-                  className="rounded-full"
-                  disabled={!memberId.trim() || invite.isPending}
-                  onClick={() => invite.mutate()}
-                >
-                  Invite
-                </Button>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Or paste user id (uuid)"
+                    value={memberId}
+                    onChange={(e) => setMemberId(e.target.value)}
+                    aria-label="Member user id"
+                  />
+                  <Button
+                    className="rounded-full"
+                    disabled={!(inviteEmail.trim() || memberId.trim()) || invite.isPending}
+                    onClick={() => invite.mutate()}
+                  >
+                    Invite
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

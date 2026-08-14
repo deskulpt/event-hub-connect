@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, BookmarkCheck, BookmarkPlus, MapPin, Sparkles, Wallet, Users } from "lucide-react";
+import { ArrowLeft, BookmarkCheck, BookmarkPlus, MapPin, PhoneCall, Sparkles, Wallet, Users } from "lucide-react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { EmptyState } from "@/components/shell/EmptyState";
@@ -19,6 +19,7 @@ import {
   unsaveListing,
 } from "@/services/listings";
 import { SendInquiryDialog } from "@/components/crm/SendInquiryDialog";
+import { startAiCall } from "@/services/invites";
 import { formatCents, scoreVendorFit, scoreVenueFit } from "@/lib/fitScore";
 import { FitRing } from "@/components/marketplace/FitRing";
 import { ListingCover } from "@/components/marketplace/ListingCover";
@@ -44,6 +45,7 @@ const FitBar = ({ label, value }: { label: string; value: number }) => {
 
 export default function ListingDetail() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const { type, id } = useParams<{ type: string; id: string }>();
   const kind = type === "venue" ? "venue" : "pro";
@@ -105,6 +107,22 @@ export default function ListingDetail() {
   const price = kind === "venue" ? venue?.base_price_cents : vendor?.base_price_cents;
   const photo = kind === "venue" ? venue?.photo_url : vendor?.photo_url;
 
+  const aiCallMut = useMutation({
+    mutationFn: () =>
+      startAiCall({
+        event_id: activeEvent?.id,
+        target_kind: kind === "venue" ? "venue" : "vendor",
+        target_id: id!,
+        target_name: name ?? undefined,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["voice-calls"] });
+      toast.success("AI call queued");
+      navigate("/app/crm/calls");
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Could not start AI call"),
+  });
+
   return (
     <PageLayout>
       <Button asChild size="sm" variant="ghost" className="w-fit">
@@ -154,11 +172,22 @@ export default function ListingDetail() {
                   </Button>
                 )}
                 {ownerId && user && (
-                  <SendInquiryDialog
-                    eventId={activeEvent?.id ?? null}
-                    defaultSubject={name ? `Inquiry: ${name}` : ""}
-                    triggerLabel="Send inquiry"
-                  />
+                  <>
+                    <SendInquiryDialog
+                      eventId={activeEvent?.id ?? null}
+                      defaultSubject={name ? `Inquiry: ${name}` : ""}
+                      triggerLabel="Send inquiry"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={aiCallMut.isPending}
+                      onClick={() => aiCallMut.mutate()}
+                    >
+                      <PhoneCall className="mr-1 h-4 w-4" />
+                      AI call
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

@@ -77,6 +77,19 @@ export const updateBookingStatus = async (id: string, status: BookingStatus): Pr
   return data as BookingRecord;
 };
 
+/** Deposit lifecycle derived from booking status (no extra column required). */
+export type DepositState = "none" | "unpaid" | "paid" | "refunded";
+
+export const getDepositState = (b: Pick<BookingRecord, "deposit_cents" | "status">): DepositState => {
+  if (!b.deposit_cents) return "none";
+  if (b.status === "refunded") return "refunded";
+  if (b.status === "pending" || b.status === "cancelled") return "unpaid";
+  return "paid";
+};
+
+export const markDepositPaid = (id: string) => updateBookingStatus(id, "confirmed");
+export const markDepositRefunded = (id: string) => updateBookingStatus(id, "refunded");
+
 export const deleteBooking = async (id: string): Promise<void> => {
   const { error } = await supabase.from("bookings").delete().eq("id", id);
   if (error) throw error;

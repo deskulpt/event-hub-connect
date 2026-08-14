@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Send, Inbox, ArrowUpRight } from "lucide-react";
+import { Send, Inbox, ArrowUpRight, PhoneCall } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { PageHeader } from "@/components/shell/PageHeader";
@@ -25,6 +25,7 @@ import {
   updateInquiryStatus,
 } from "@/services/inquiries";
 import { acceptInquiryAsBooking } from "@/services/bookings";
+import { startAiCall } from "@/services/invites";
 import type { InquiryRecord, InquiryStatus } from "@/types/inquiry";
 
 const statusVariant: Record<InquiryStatus, "default" | "secondary" | "outline" | "destructive"> = {
@@ -43,11 +44,15 @@ const InquiryRow = ({
   side,
   onUpdate,
   onAccept,
+  onAiCall,
+  aiBusy,
 }: {
   inquiry: InquiryRecord;
   side: "sent" | "received";
   onUpdate: (id: string, status: InquiryStatus) => void;
   onAccept: (inquiry: InquiryRecord) => void;
+  onAiCall: (inquiry: InquiryRecord) => void;
+  aiBusy?: boolean;
 }) => {
   const budget = formatBudget(inquiry.budget_min_cents, inquiry.budget_max_cents);
   return (
@@ -66,13 +71,21 @@ const InquiryRow = ({
         </div>
         {inquiry.message && <p className="line-clamp-2 text-xs text-muted-foreground">{inquiry.message}</p>}
       </div>
-      {side === "received" && inquiry.status !== "replied" && inquiry.status !== "declined" && (
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => onAccept(inquiry)}>Accept & book</Button>
-          <Button size="sm" variant="outline" onClick={() => onUpdate(inquiry.id, "replied")}>Mark replied</Button>
-          <Button size="sm" variant="ghost" onClick={() => onUpdate(inquiry.id, "declined")}>Decline</Button>
-        </div>
-      )}
+      <div className="flex flex-wrap gap-2">
+        {side === "sent" && (
+          <Button size="sm" variant="outline" disabled={aiBusy} onClick={() => onAiCall(inquiry)}>
+            <PhoneCall className="mr-1 h-3.5 w-3.5" />
+            AI call
+          </Button>
+        )}
+        {side === "received" && inquiry.status !== "replied" && inquiry.status !== "declined" && (
+          <>
+            <Button size="sm" onClick={() => onAccept(inquiry)}>Accept & book</Button>
+            <Button size="sm" variant="outline" onClick={() => onUpdate(inquiry.id, "replied")}>Mark replied</Button>
+            <Button size="sm" variant="ghost" onClick={() => onUpdate(inquiry.id, "declined")}>Decline</Button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
@@ -126,6 +139,23 @@ export default function Inquiries() {
     onError: (e: Error) => toast.error(e.message ?? "Could not create booking"),
   });
 
+  const aiCallMutation = useMutation({
+    mutationFn: (inquiry: InquiryRecord) =>
+      startAiCall({
+        inquiry_id: inquiry.id,
+        event_id: inquiry.event_id ?? undefined,
+        target_kind: inquiry.recipient_kind === "venue" ? "venue" : "vendor",
+        target_id: inquiry.recipient_id,
+        target_name: inquiry.subject,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["voice-calls"] });
+      toast.success("AI call queued — check AI Calls for the outcome");
+      navigate("/app/crm/calls");
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Could not start AI call"),
+  });
+
   const apply = (rows: InquiryRecord[]) => filter === "all" ? rows : rows.filter((r) => r.status === filter);
 
   return (
@@ -174,6 +204,8 @@ export default function Inquiries() {
                   side="sent"
                   onUpdate={(id, status) => updateMutation.mutate({ id, status })}
                   onAccept={setAcceptTarget}
+                  onAiCall={(inq) => aiCallMutation.mutate(inq)}
+                  aiBusy={aiCallMutation.isPending}
                 />
               ))
             )}
@@ -198,6 +230,8 @@ export default function Inquiries() {
                   side="received"
                   onUpdate={(id, status) => updateMutation.mutate({ id, status })}
                   onAccept={setAcceptTarget}
+                  onAiCall={(inq) => aiCallMutation.mutate(inq)}
+                  aiBusy={aiCallMutation.isPending}
                 />
               ))
             )}

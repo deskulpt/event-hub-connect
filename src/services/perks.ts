@@ -51,12 +51,10 @@ export const createPerk = async (input: PerkInput, ownerId: string): Promise<Per
   return data as PerkOffer;
 };
 
-export const listMemorabilia = async (): Promise<MemorabiliaListing[]> => {
-  const { data, error } = await supabase
-    .from("memorabilia_listings")
-    .select("*")
-    .eq("status", "active")
-    .order("created_at", { ascending: false });
+export const listMemorabilia = async (localityId?: string | null): Promise<MemorabiliaListing[]> => {
+  let query = supabase.from("memorabilia_listings").select("*").eq("status", "active");
+  if (localityId) query = query.or(`locality_id.eq.${localityId},locality_id.is.null`);
+  const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as MemorabiliaListing[];
 };

@@ -58,11 +58,23 @@ export const listOrgMembers = async (organizationId: string): Promise<Organizati
   return (data ?? []) as OrganizationMember[];
 };
 
+export const lookupUserIdByEmail = async (emailOrId: string): Promise<string> => {
+  const raw = emailOrId.trim();
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(raw)) {
+    return raw;
+  }
+  const { data, error } = await supabase.rpc("lookup_user_id_by_email", { _email: raw });
+  if (error) throw error;
+  if (!data) throw new Error("No member found with that email");
+  return data as string;
+};
+
 export const inviteOrgMember = async (
   organizationId: string,
-  userId: string,
+  emailOrUserId: string,
   orgRole = "member",
 ) => {
+  const userId = await lookupUserIdByEmail(emailOrUserId);
   const { error } = await supabase
     .from("organization_members")
     .insert({ organization_id: organizationId, user_id: userId, org_role: orgRole });

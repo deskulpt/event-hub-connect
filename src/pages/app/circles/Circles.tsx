@@ -26,6 +26,7 @@ export const Circles = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [interestFilter, setInterestFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -73,10 +74,16 @@ export const Circles = () => {
     onError: () => toast.error("Could not create the circle. Please try again."),
   });
 
-  const circles = (circlesQuery.data ?? []).filter((circle) =>
-    circle.name.toLowerCase().includes(search.trim().toLowerCase()),
-  );
+  const circles = (circlesQuery.data ?? []).filter((circle) => {
+    const matchesSearch = circle.name.toLowerCase().includes(search.trim().toLowerCase());
+    const matchesInterest =
+      interestFilter === "all" || (circle.interest_tags ?? []).includes(interestFilter);
+    return matchesSearch && matchesInterest;
+  });
   const myIds = myCirclesQuery.data ?? [];
+  const availableInterests = Array.from(
+    new Set((circlesQuery.data ?? []).flatMap((c) => c.interest_tags ?? [])),
+  ).sort();
 
   return (
     <PageLayout>
@@ -154,6 +161,36 @@ export const Circles = () => {
         aria-label="Search circles"
         className="max-w-sm rounded-full"
       />
+
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          onClick={() => setInterestFilter("all")}
+          className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+            interestFilter === "all"
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border/60 text-muted-foreground"
+          }`}
+        >
+          All interests
+        </button>
+        {(availableInterests.length > 0 ? availableInterests : INTEREST_OPTIONS.slice(0, 8)).map(
+          (interest) => (
+            <button
+              key={interest}
+              type="button"
+              onClick={() => setInterestFilter(interest)}
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                interestFilter === interest
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border/60 text-muted-foreground"
+              }`}
+            >
+              {interest}
+            </button>
+          ),
+        )}
+      </div>
 
       {circlesQuery.isLoading && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
