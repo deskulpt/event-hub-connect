@@ -31,23 +31,6 @@ import Inquiries from "./pages/app/crm/Inquiries";
 import Calls from "./pages/app/crm/Calls";
 import Bookings from "./pages/app/crm/Bookings";
 import Tasks from "./pages/app/crm/Tasks";
-import MasterCalendar from "./pages/app/calendar/Master";
-import Availability from "./pages/app/calendar/Availability";
-import Scheduling from "./pages/app/calendar/Scheduling";
-import FinanceOverview from "./pages/app/finance/Overview";
-import Transactions from "./pages/app/finance/Transactions";
-import Invoices from "./pages/app/finance/Invoices";
-import Receipts from "./pages/app/finance/Receipts";
-import Payouts from "./pages/app/finance/Payouts";
-import Pnl from "./pages/app/finance/Pnl";
-import Integrations from "./pages/app/finance/Integrations";
-import Verification from "./pages/app/trust/Verification";
-import Insurance from "./pages/app/trust/Insurance";
-import Reviews from "./pages/app/trust/Reviews";
-import Disputes from "./pages/app/trust/Disputes";
-import Policies from "./pages/app/trust/Policies";
-import Inbox from "./pages/app/Inbox";
-import Insights from "./pages/app/Insights";
 import Settings from "./pages/app/settings/Settings";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RequireStaff } from "./components/RequireStaff";
@@ -56,7 +39,6 @@ import { CircleDetail } from "./pages/app/circles/CircleDetail";
 import { Proposals } from "./pages/app/proposals/Proposals";
 import { Perks } from "./pages/app/perks/Perks";
 import { ManagePerks } from "./pages/app/perks/ManagePerks";
-import { Memorabilia } from "./pages/app/memorabilia/Memorabilia";
 import { Orgs } from "./pages/app/orgs/Orgs";
 import { OrgDetail } from "./pages/app/orgs/OrgDetail";
 import { Sponsorships } from "./pages/app/orgs/Sponsorships";
@@ -87,7 +69,6 @@ const App = () => (
                 <Route path="proposals" element={<Proposals />} />
                 <Route path="perks" element={<Perks />} />
                 <Route path="perks/manage" element={<ManagePerks />} />
-                <Route path="memorabilia" element={<Memorabilia />} />
                 <Route path="orgs" element={<Orgs />} />
                 <Route path="orgs/sponsorships" element={<Sponsorships />} />
                 <Route path="orgs/:id" element={<OrgDetail />} />
@@ -108,22 +89,17 @@ const App = () => (
                 <Route path="crm/calls" element={<Calls />} />
                 <Route path="crm/bookings" element={<Bookings />} />
                 <Route path="crm/tasks" element={<Tasks />} />
-                <Route path="calendar" element={<MasterCalendar />} />
-                <Route path="calendar/availability" element={<Availability />} />
-                <Route path="calendar/scheduling" element={<Scheduling />} />
-                <Route path="finance" element={<FinanceOverview />} />
-                <Route path="finance/transactions" element={<Transactions />} />
-                <Route path="finance/invoices" element={<Invoices />} />
-                <Route path="finance/receipts" element={<Receipts />} />
-                <Route path="finance/payouts" element={<Payouts />} />
-                <Route path="finance/pnl" element={<Pnl />} />
-                <Route path="finance/integrations" element={<Integrations />} />
-                <Route path="trust" element={<Verification />} />
+                {/* Placeholder shells hidden — redirect seniors to Home */}
+                <Route path="calendar" element={<Navigate to="/app" replace />} />
+                <Route path="calendar/*" element={<Navigate to="/app" replace />} />
+                <Route path="finance" element={<Navigate to="/app" replace />} />
+                <Route path="finance/*" element={<Navigate to="/app" replace />} />
+                <Route path="trust" element={<Navigate to="/app" replace />} />
                 <Route path="trust/credentials" element={<Credentials />} />
-                <Route path="trust/insurance" element={<Insurance />} />
-                <Route path="trust/reviews" element={<Reviews />} />
-                <Route path="trust/disputes" element={<Disputes />} />
-                <Route path="trust/policies" element={<Policies />} />
+                <Route path="trust/*" element={<Navigate to="/app" replace />} />
+                <Route path="inbox" element={<Navigate to="/app" replace />} />
+                <Route path="insights" element={<Navigate to="/app" replace />} />
+                <Route path="memorabilia" element={<Navigate to="/app" replace />} />
                 <Route
                   path="admin"
                   element={
@@ -140,8 +116,6 @@ const App = () => (
                     </RequireStaff>
                   }
                 />
-                <Route path="inbox" element={<Inbox />} />
-                <Route path="insights" element={<Insights />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="settings/*" element={<Settings />} />
               </Route>
