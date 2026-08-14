@@ -16,6 +16,7 @@
 | RLS enabled on all public app tables | ✅ |
 | Phase 3 attendance/feedback columns on `events` | ✅ |
 | `profiles.marital_status` (20260805143000) | ✅ applied this session |
+| `lookup_user_id_by_email` (20260814120000) | ✅ applied |
 | Realtime channel policies on `realtime.messages` | ⚠️ see below |
 
 ## Realtime follow-up (manual)
@@ -67,4 +68,5 @@ WITH CHECK (
 20260804045649  realtime.messages policies  ← needs Dashboard if not owner
 20260805001200  activity attendance + feedback
 20260805143000  profiles.marital_status
+20260814120000  lookup_user_id_by_email (org invites)
 ```
