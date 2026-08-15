@@ -124,6 +124,11 @@ export default function Onboarding() {
       setStep(2);
       return;
     }
+    if (!localityId) {
+      toast.error("Pick a locality near you so we can show nearby activities.");
+      setStep(2);
+      return;
+    }
     setLoading(true);
     try {
       for (const role of selected) {

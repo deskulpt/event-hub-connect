@@ -46,6 +46,23 @@ export const claimProposal = async (proposalId: string, userId: string) => {
   if (error) throw error;
 };
 
+export const claimAndPublishProposal = async (
+  proposal: ActivityProposal,
+  userId: string,
+): Promise<string> => {
+  await claimProposal(proposal.id, userId);
+  try {
+    return await publishProposalAsActivity(proposal, userId);
+  } catch (err) {
+    await supabase
+      .from("generated_activity_proposals")
+      .update({ claimed_by: null })
+      .eq("id", proposal.id)
+      .eq("claimed_by", userId);
+    throw err;
+  }
+};
+
 export const generateProposals = async (localityId: string, slateSize?: number) => {
   const { data, error } = await supabase.functions.invoke("generate-proposals", {
     body: { localityId, slateSize },
@@ -78,9 +95,14 @@ export const publishProposalAsActivity = async (
     .select("id")
     .single();
   if (error) throw error;
-  await supabase
+  const { error: linkErr } = await supabase
     .from("generated_activity_proposals")
     .update({ status: "published", event_id: data.id })
     .eq("id", proposal.id);
+  if (linkErr) {
+    // Best-effort rollback so we don't leave an orphan activity without proposal link
+    await supabase.from("events").delete().eq("id", data.id);
+    throw linkErr;
+  }
   return data.id;
 };

@@ -29,16 +29,20 @@ export default function Auth() {
   const [otpSent, setOtpSent] = useState(false);
   const [isSignUp, setIsSignUp] = useState(params.get("mode") === "signup");
 
-  const afterSignedIn = () => {
+  const postAuthPath = () => {
     const hasBrief = !!readPendingBrief();
-    navigate(hasBrief ? "/onboarding" : next);
+    return hasBrief ? "/onboarding" : next;
+  };
+
+  const afterSignedIn = () => {
+    navigate(postAuthPath());
   };
 
   const handleGoogle = async () => {
     setOauthLoading("google");
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: redirectTo("/onboarding"),
+        redirect_uri: redirectTo(postAuthPath()),
       });
       if (result.error) {
         toast.error(result.error instanceof Error ? result.error.message : String(result.error));
@@ -56,7 +60,7 @@ export default function Auth() {
     setOauthLoading("facebook");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "facebook",
-      options: { redirectTo: redirectTo("/onboarding") },
+      options: { redirectTo: redirectTo(postAuthPath()) },
     });
     setOauthLoading(null);
     if (error) toast.error(error.message);
@@ -69,7 +73,7 @@ export default function Auth() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: redirectTo("/onboarding"),
+        emailRedirectTo: redirectTo(postAuthPath()),
         data: fullName ? { full_name: fullName } : undefined,
       },
     });
@@ -123,8 +127,9 @@ export default function Auth() {
 
   const handlePasswordSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password.length < 8) return toast.error("Use at least 8 characters for your password");
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -134,6 +139,12 @@ export default function Auth() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
+    if (!data.session) {
+      toast.success("Check your email to confirm your account, then sign in.");
+      setIsSignUp(false);
+      setStep("password");
+      return;
+    }
     toast.success("Welcome to Vibely!");
     navigate("/onboarding");
   };

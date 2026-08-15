@@ -160,6 +160,12 @@ export default function Bookings() {
         <TabsContent value="host" className="space-y-2">
           <Card><CardContent className="space-y-2 p-4">
             {hostQ.isLoading ? <Skeleton className="h-20 w-full" /> :
+              hostQ.isError ? (
+                <EmptyState icon={<CalendarCheck className="h-5 w-5 text-primary" />}
+                  title="Could not load bookings"
+                  description="Something went wrong. Retry in a moment."
+                  action={<Button variant="outline" onClick={() => hostQ.refetch()}>Retry</Button>} />
+              ) :
               (hostQ.data ?? []).length === 0 ? (
                 <EmptyState icon={<CalendarCheck className="h-5 w-5 text-primary" />}
                   title="No bookings yet" description="Create a booking from a replied inquiry or use New booking above."

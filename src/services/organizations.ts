@@ -38,9 +38,13 @@ export const createOrganization = async (
     .select()
     .single();
   if (error) throw error;
-  await supabase
+  const { error: memberErr } = await supabase
     .from("organization_members")
     .insert({ organization_id: data.id, user_id: ownerId, org_role: "admin" });
+  if (memberErr) {
+    await supabase.from("organizations").delete().eq("id", data.id);
+    throw memberErr;
+  }
   return data as Organization;
 };
 

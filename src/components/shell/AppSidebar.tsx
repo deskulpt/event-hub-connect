@@ -1,5 +1,5 @@
 import {
-  Home, CalendarDays, Users, Gift, Vote, Building2, Settings,
+  Home, CalendarDays, Users, Gift, Vote, Building2, Settings, Store,
   MessageSquare, Bookmark, ShieldCheck, ClipboardList, Sparkles, SlidersHorizontal,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
@@ -27,6 +27,7 @@ const communityNav: NavItem[] = [
   { titleKey: "nav.vote", fallback: "Vote", url: "/app/proposals", icon: Vote },
   { titleKey: "nav.circles", fallback: "Circles", url: "/app/circles", icon: Users },
   { titleKey: "nav.perks", fallback: "Perks", url: "/app/perks", icon: Gift },
+  { titleKey: "nav.memorabilia", fallback: "Memorabilia", url: "/app/memorabilia", icon: Store },
   { titleKey: "nav.settings", fallback: "Settings", url: "/app/settings", icon: Settings },
 ];
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,6 +32,7 @@ interface AuthContextValue {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  profileError: string | null;
   roles: AppRole[];
   loading: boolean;
   signOut: () => Promise<void>;
@@ -44,39 +45,57 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async (userId: string) => {
-    const [{ data: p }, { data: r }] = await Promise.all([
+  const loadProfile = useCallback(async (userId: string) => {
+    const [{ data: p, error: pErr }, { data: r, error: rErr }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
+    if (pErr || rErr) {
+      setProfileError(pErr?.message || rErr?.message || "Profile load failed");
+      setProfile(null);
+      setRoles([]);
+      return;
+    }
+    setProfileError(null);
     setProfile((p as Profile) ?? null);
     setRoles(((r ?? []) as { role: AppRole }[]).map((x) => x.role));
-  };
+  }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        setTimeout(() => loadProfile(s.user.id), 0);
+        void loadProfile(s.user.id);
       } else {
         setProfile(null);
         setRoles([]);
+        setProfileError(null);
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    void supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+      if (cancelled) return;
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) loadProfile(s.user.id).finally(() => setLoading(false));
-      else setLoading(false);
+      try {
+        if (s?.user) await loadProfile(s.user.id);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     });
 
-    return () => sub.subscription.unsubscribe();
-  }, []);
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [loadProfile]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -87,7 +106,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, roles, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider
+      value={{ user, session, profile, profileError, roles, loading, signOut, refreshProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );

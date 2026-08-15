@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CityAutocomplete } from "@/components/CityAutocomplete";
 import { cn } from "@/lib/utils";
@@ -135,7 +135,7 @@ export const HomePrefsExperience = () => {
         </div>
       </fieldset>
 
-      <fieldset className="mt-8 space-y-3" disabled={!ageBand}>
+      <fieldset className="mt-8 space-y-3">
         <legend className="text-lg font-bold text-foreground">Marital status</legend>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Marital status">
           {MARITAL_OPTIONS.map((opt) => (
@@ -152,22 +152,28 @@ export const HomePrefsExperience = () => {
         </div>
       </fieldset>
 
-      <fieldset className="mt-8 space-y-3" disabled={!marital}>
+      <fieldset className="mt-8 space-y-3">
         <legend className="text-lg font-bold text-foreground">Where you live</legend>
+        <p className="text-sm text-muted-foreground">
+          Pick a suggested area if shown, or type your city.
+        </p>
         <label htmlFor="home-city" className="sr-only">
           City or neighbourhood
         </label>
-        <div className="relative">
-          <MapPin className="pointer-events-none absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-foreground" aria-hidden />
-          <CityAutocomplete
-            id="home-city"
-            value={city}
-            onChange={onCityChange}
-            placeholder="Neighbourhood or city"
-            className="w-full"
-            inputClassName="h-14 rounded-2xl border-2 border-border bg-background pl-11 text-lg font-medium text-foreground"
-          />
-        </div>
+        <CityAutocomplete
+          id="home-city"
+          value={city}
+          onChange={onCityChange}
+          placeholder="Neighbourhood or city"
+          className="w-full"
+          inputClassName="h-14 rounded-2xl border-2 border-border bg-background pl-11 text-lg font-medium text-foreground"
+          iconClassName="h-5 w-5 text-foreground"
+        />
+        {localitiesQ.isError && (
+          <p className="text-sm text-muted-foreground">
+            Suggestions unavailable right now — typing your city still works.
+          </p>
+        )}
         {(localitiesQ.data?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-2" role="group" aria-label="Suggested localities">
             {(localitiesQ.data ?? []).slice(0, 8).map((loc) => (
@@ -188,7 +194,7 @@ export const HomePrefsExperience = () => {
         )}
       </fieldset>
 
-      <fieldset className="mt-8 space-y-3" disabled={!city.trim()}>
+      <fieldset className="mt-8 space-y-3">
         <legend className="text-lg font-bold text-foreground">
           Interests <span className="font-medium text-muted-foreground">(pick at least 3)</span>
         </legend>

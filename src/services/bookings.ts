@@ -67,7 +67,12 @@ export const acceptInquiryAsBooking = async (
     },
     inquiry.sender_id,
   );
-  await updateInquiryStatus(inquiry.id, "replied", "Accepted — booking created");
+  try {
+    await updateInquiryStatus(inquiry.id, "replied", "Accepted — booking created");
+  } catch (err) {
+    await deleteBooking(booking.id);
+    throw err;
+  }
   return booking;
 };
 

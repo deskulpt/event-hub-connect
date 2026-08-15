@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePreferences } from "@/contexts/PreferencesContext";
 import {
-  castVote, claimProposal, listMyVotes, listProposals, publishProposalAsActivity, withdrawVote,
+  castVote, claimAndPublishProposal, listMyVotes, listProposals, withdrawVote,
 } from "@/services/proposals";
 import type { ActivityProposal, ProposalStatus } from "@/types/community";
 
@@ -60,8 +60,7 @@ export const Proposals = () => {
 
   const claim = useMutation({
     mutationFn: async (proposal: ActivityProposal) => {
-      await claimProposal(proposal.id, user!.id);
-      return publishProposalAsActivity(proposal, user!.id);
+      return claimAndPublishProposal(proposal, user!.id);
     },
     onSuccess: (eventId) => {
       invalidate();

@@ -43,6 +43,7 @@ import { Orgs } from "./pages/app/orgs/Orgs";
 import { OrgDetail } from "./pages/app/orgs/OrgDetail";
 import { Sponsorships } from "./pages/app/orgs/Sponsorships";
 import { Admin } from "./pages/app/admin/Admin";
+import { Memorabilia } from "./pages/app/memorabilia/Memorabilia";
 import { Credentials } from "./pages/app/trust/Credentials";
 
 const queryClient = new QueryClient();
@@ -99,7 +100,7 @@ const App = () => (
                 <Route path="trust/*" element={<Navigate to="/app" replace />} />
                 <Route path="inbox" element={<Navigate to="/app" replace />} />
                 <Route path="insights" element={<Navigate to="/app" replace />} />
-                <Route path="memorabilia" element={<Navigate to="/app" replace />} />
+                <Route path="memorabilia" element={<Memorabilia />} />
                 <Route
                   path="admin"
                   element={

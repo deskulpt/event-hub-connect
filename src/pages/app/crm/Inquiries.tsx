@@ -189,6 +189,13 @@ export default function Inquiries() {
           <Card><CardContent className="space-y-2 p-4">
             {sentQ.isLoading ? (
               <Skeleton className="h-20 w-full" />
+            ) : sentQ.isError ? (
+              <EmptyState
+                icon={<Send className="h-5 w-5 text-primary" />}
+                title="Could not load sent inquiries"
+                description="Check your connection and try again."
+                action={<Button variant="outline" onClick={() => sentQ.refetch()}>Retry</Button>}
+              />
             ) : apply(sentQ.data ?? []).length === 0 ? (
               <EmptyState
                 icon={<Send className="h-5 w-5 text-primary" />}
@@ -216,6 +223,13 @@ export default function Inquiries() {
           <Card><CardContent className="space-y-2 p-4">
             {receivedQ.isLoading ? (
               <Skeleton className="h-20 w-full" />
+            ) : receivedQ.isError ? (
+              <EmptyState
+                icon={<Inbox className="h-5 w-5 text-primary" />}
+                title="Could not load received inquiries"
+                description="Check your connection and try again."
+                action={<Button variant="outline" onClick={() => receivedQ.refetch()}>Retry</Button>}
+              />
             ) : apply(receivedQ.data ?? []).length === 0 ? (
               <EmptyState
                 icon={<Inbox className="h-5 w-5 text-primary" />}

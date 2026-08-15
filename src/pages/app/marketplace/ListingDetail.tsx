@@ -48,6 +48,7 @@ export default function ListingDetail() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { type, id } = useParams<{ type: string; id: string }>();
+  // Venues use venue records; pros and businesses use vendor records today.
   const kind = type === "venue" ? "venue" : "pro";
   const [busy, setBusy] = useState(false);
 

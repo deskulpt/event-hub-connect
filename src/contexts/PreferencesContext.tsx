@@ -75,7 +75,8 @@ export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
   const persist = useCallback(
     async (patch: TablesUpdate<"profiles">) => {
       if (!user) return;
-      await supabase.from("profiles").update(patch).eq("id", user.id);
+      const { error } = await supabase.from("profiles").update(patch).eq("id", user.id);
+      if (error) throw error;
       await refreshProfile();
     },
     [user, refreshProfile],
@@ -89,21 +90,45 @@ export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
       interests,
       t: (key: string) => translate(language, key),
       setLanguage: async (code) => {
+        const prev = language;
         setLanguageState(code);
-        await persist({ preferred_language: code });
+        try {
+          await persist({ preferred_language: code });
+        } catch {
+          setLanguageState(prev);
+          throw new Error("Could not save language");
+        }
       },
       setAccessibility: async (prefs) => {
+        const prev = accessibility;
         const next = { ...accessibility, ...prefs };
         setAccessibilityState(next);
-        await persist({ accessibility_prefs: next });
+        try {
+          await persist({ accessibility_prefs: next });
+        } catch {
+          setAccessibilityState(prev);
+          throw new Error("Could not save accessibility preferences");
+        }
       },
       setLocalityId: async (id) => {
+        const prev = localityId;
         setLocalityIdState(id);
-        await persist({ locality_id: id });
+        try {
+          await persist({ locality_id: id });
+        } catch {
+          setLocalityIdState(prev);
+          throw new Error("Could not save locality");
+        }
       },
       setInterests: async (values) => {
+        const prev = interests;
         setInterestsState(values);
-        await persist({ interests: values });
+        try {
+          await persist({ interests: values });
+        } catch {
+          setInterestsState(prev);
+          throw new Error("Could not save interests");
+        }
       },
     }),
     [language, accessibility, localityId, interests, persist],
