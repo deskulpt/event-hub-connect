@@ -2,42 +2,33 @@ import { Link } from "react-router-dom";
 
 export const SiteFooter = () => {
   return (
-    <footer className="border-t border-border/60 bg-muted/40">
+    <footer className="border-t-2 border-border bg-card">
       <div className="container px-4 py-10">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-3">
           <div>
-            <p className="font-display text-xl font-semibold text-secondary">Vibely</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Plan any gathering — from a dinner for two to a wedding for two hundred.
+            <p className="font-display text-xl font-semibold text-foreground">Vibely</p>
+            <p className="mt-2 text-base text-muted-foreground">
+              Local community for adults 50+ — activities, circles, and neighbours nearby.
             </p>
           </div>
           <FooterCol
-            title="Discover"
+            title="Explore"
             links={[
-              { label: "Venues", to: "/explore?tab=venues" },
-              { label: "Professionals", to: "/explore?tab=pros" },
-              { label: "At-home experiences", to: "/explore?type=at-home" },
-            ]}
-          />
-          <FooterCol
-            title="For partners"
-            links={[
-              { label: "List your service", to: "/pros" },
-              { label: "Vetting & trust", to: "/trust" },
-              { label: "Partner portal", to: "/auth?mode=signup&role=pro" },
+              { label: "How it works", to: "/#how" },
+              { label: "Join free", to: "/auth?mode=signup" },
+              { label: "Sign in", to: "/auth" },
             ]}
           />
           <FooterCol
             title="Company"
             links={[
-              { label: "How it works", to: "/how-it-works" },
               { label: "Terms", to: "/terms" },
               { label: "Privacy", to: "/privacy" },
             ]}
           />
         </div>
-        <p className="mt-10 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Vibely. Made for memorable moments.
+        <p className="mt-10 text-sm text-muted-foreground">
+          © {new Date().getFullYear()} Vibely. Built for connection, not clutter.
         </p>
       </div>
     </footer>
@@ -46,11 +37,11 @@ export const SiteFooter = () => {
 
 const FooterCol = ({ title, links }: { title: string; links: { label: string; to: string }[] }) => (
   <div>
-    <p className="text-sm font-semibold text-foreground">{title}</p>
+    <p className="text-base font-bold text-foreground">{title}</p>
     <ul className="mt-3 space-y-2">
       {links.map((l) => (
         <li key={l.to}>
-          <Link to={l.to} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+          <Link to={l.to} className="text-base text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
             {l.label}
           </Link>
         </li>
