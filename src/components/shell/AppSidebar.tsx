@@ -1,6 +1,6 @@
 import {
-  Home, CalendarDays, Users, Calendar, Wallet, ShieldCheck, Inbox, BarChart3, Settings,
-  Bookmark, MessageSquare, ClipboardList, Sparkles, Gift, Vote, Building2, Store, SlidersHorizontal,
+  Home, CalendarDays, Users, Gift, Vote, Building2, Settings,
+  MessageSquare, Bookmark, ShieldCheck, ClipboardList, Sparkles, SlidersHorizontal,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -16,48 +16,41 @@ import {
 } from "@/components/ui/sidebar";
 import { useActiveRole } from "@/hooks/useActiveRole";
 import { useAuth, MODERATOR_ROLES, type AppRole } from "@/contexts/AuthContext";
+import { usePreferences } from "@/contexts/PreferencesContext";
 
-type NavItem = { title: string; url: string; icon: typeof Home; end?: boolean };
+type NavItem = { titleKey: string; fallback: string; url: string; icon: typeof Home; end?: boolean };
 
+/** Senior-first: only flows that are wired and useful day-to-day. */
 const communityNav: NavItem[] = [
-  { title: "Home", url: "/app", icon: Home, end: true },
-  { title: "Activities", url: "/app/events", icon: CalendarDays },
-  { title: "Proposals", url: "/app/proposals", icon: Vote },
-  { title: "Circles", url: "/app/circles", icon: Users },
-  { title: "Perks", url: "/app/perks", icon: Gift },
-  { title: "Memorabilia", url: "/app/memorabilia", icon: Store },
-  { title: "Calendar", url: "/app/calendar", icon: Calendar },
-  { title: "Inbox", url: "/app/inbox", icon: Inbox },
-  { title: "Settings", url: "/app/settings", icon: Settings },
+  { titleKey: "nav.home", fallback: "Home", url: "/app", icon: Home, end: true },
+  { titleKey: "nav.activities", fallback: "Activities", url: "/app/events", icon: CalendarDays },
+  { titleKey: "nav.vote", fallback: "Vote", url: "/app/proposals", icon: Vote },
+  { titleKey: "nav.circles", fallback: "Circles", url: "/app/circles", icon: Users },
+  { titleKey: "nav.perks", fallback: "Perks", url: "/app/perks", icon: Gift },
+  { titleKey: "nav.settings", fallback: "Settings", url: "/app/settings", icon: Settings },
 ];
 
+/** Pros: working lead/booking tools only — no placeholder finance/calendar shells. */
 const professionalNav: NavItem[] = [
-  { title: "Home", url: "/app", icon: Home, end: true },
-  { title: "Leads", url: "/app/crm/inquiries", icon: MessageSquare },
-  { title: "Bookings", url: "/app/crm/bookings", icon: Bookmark },
-  { title: "Activities", url: "/app/events", icon: CalendarDays },
-  { title: "Calendar", url: "/app/calendar", icon: Calendar },
-  { title: "Perks I offer", url: "/app/perks/manage", icon: Gift },
-  { title: "Credentials", url: "/app/trust/credentials", icon: ShieldCheck },
-  { title: "Billing", url: "/app/finance", icon: Wallet },
-  { title: "Trust", url: "/app/trust", icon: ShieldCheck },
-  { title: "Inbox", url: "/app/inbox", icon: Inbox },
-  { title: "Settings", url: "/app/settings", icon: Settings },
+  { titleKey: "nav.home", fallback: "Home", url: "/app", icon: Home, end: true },
+  { titleKey: "nav.leads", fallback: "Leads", url: "/app/crm/inquiries", icon: MessageSquare },
+  { titleKey: "nav.bookings", fallback: "Bookings", url: "/app/crm/bookings", icon: Bookmark },
+  { titleKey: "nav.activities", fallback: "Activities", url: "/app/events", icon: CalendarDays },
+  { titleKey: "nav.perksOffer", fallback: "Perks I offer", url: "/app/perks/manage", icon: Gift },
+  { titleKey: "nav.credentials", fallback: "Credentials", url: "/app/trust/credentials", icon: ShieldCheck },
+  { titleKey: "nav.settings", fallback: "Settings", url: "/app/settings", icon: Settings },
 ];
 
+/** Orgs/sponsors: real org + sponsorship surfaces only. */
 const orgNav: NavItem[] = [
-  { title: "Home", url: "/app", icon: Home, end: true },
-  { title: "Orgs", url: "/app/orgs", icon: Building2 },
-  { title: "Sponsorships", url: "/app/orgs/sponsorships", icon: Gift },
-  { title: "Activities", url: "/app/events", icon: CalendarDays },
-  { title: "Circles", url: "/app/circles", icon: Users },
-  { title: "Perks I offer", url: "/app/perks/manage", icon: Gift },
-  { title: "Operations", url: "/app/crm/tasks", icon: ClipboardList },
-  { title: "AI Calls", url: "/app/crm/calls", icon: MessageSquare },
-  { title: "Billing", url: "/app/finance", icon: Wallet },
-  { title: "Insights", url: "/app/insights", icon: BarChart3 },
-  { title: "Inbox", url: "/app/inbox", icon: Inbox },
-  { title: "Settings", url: "/app/settings", icon: Settings },
+  { titleKey: "nav.home", fallback: "Home", url: "/app", icon: Home, end: true },
+  { titleKey: "nav.orgs", fallback: "Orgs", url: "/app/orgs", icon: Building2 },
+  { titleKey: "nav.sponsorships", fallback: "Sponsorships", url: "/app/orgs/sponsorships", icon: Gift },
+  { titleKey: "nav.activities", fallback: "Activities", url: "/app/events", icon: CalendarDays },
+  { titleKey: "nav.circles", fallback: "Circles", url: "/app/circles", icon: Users },
+  { titleKey: "nav.perksOffer", fallback: "Perks I offer", url: "/app/perks/manage", icon: Gift },
+  { titleKey: "nav.tasks", fallback: "Tasks", url: "/app/crm/tasks", icon: ClipboardList },
+  { titleKey: "nav.settings", fallback: "Settings", url: "/app/settings", icon: Settings },
 ];
 
 const navByRole: Partial<Record<AppRole, NavItem[]>> = {
@@ -96,13 +89,16 @@ export const AppSidebar = () => {
   const location = useLocation();
   const { activeRole } = useActiveRole();
   const { roles } = useAuth();
+  const { t } = usePreferences();
   const items = navByRole[activeRole] ?? communityNav;
   const workspaceLabel = labelByRole[activeRole] ?? "Community";
   const canModerate = roles.some((role) => MODERATOR_ROLES.includes(role));
   const navItems = canModerate
-    ? [...items.filter((i) => i.url !== "/app/settings"),
-       { title: "Admin", url: "/app/admin", icon: SlidersHorizontal } as NavItem,
-       { title: "Settings", url: "/app/settings", icon: Settings } as NavItem]
+    ? [
+        ...items.filter((i) => i.url !== "/app/settings"),
+        { titleKey: "nav.admin", fallback: "Admin", url: "/app/admin", icon: SlidersHorizontal } as NavItem,
+        { titleKey: "nav.settings", fallback: "Settings", url: "/app/settings", icon: Settings } as NavItem,
+      ]
     : items;
 
   return (
@@ -134,19 +130,20 @@ export const AppSidebar = () => {
                 const isActive = item.end
                   ? location.pathname === item.url
                   : location.pathname.startsWith(item.url);
+                const label = t(item.titleKey) !== item.titleKey ? t(item.titleKey) : item.fallback;
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
-                      className="group relative h-9 rounded-xl text-sm font-medium transition-all data-[active=true]:bg-gradient-sunset/10 data-[active=true]:text-primary data-[active=true]:shadow-soft"
+                      className="group relative h-11 rounded-xl text-base font-medium transition-all data-[active=true]:bg-gradient-sunset/10 data-[active=true]:text-primary data-[active=true]:shadow-soft"
                     >
                       <NavLink to={item.url} end={item.end}>
                         {isActive && (
                           <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-gradient-sunset" />
                         )}
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
+                        <item.icon className="h-5 w-5" />
+                        {!collapsed && <span>{label}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -155,19 +152,6 @@ export const AppSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {!collapsed && (
-          <div className="mt-auto px-3 pb-4">
-            <div className="rounded-2xl border border-primary/20 bg-gradient-sunset/5 p-3 backdrop-blur">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <p className="font-display text-xs font-semibold">Vibely AI</p>
-              </div>
-              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                Neighbours, ideas, votes — turned into real local activities.
-              </p>
-            </div>
-          </div>
-        )}
       </SidebarContent>
     </Sidebar>
   );
