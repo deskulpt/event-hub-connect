@@ -19,3 +19,4 @@ A complete README.md (no mention of the build platform anywhere in the text) cov
 ## Notes
 - Signed-in screens show whatever real data exists in the database.
 - PRD.md and MIGRATION-REPORT.md stay as they are, linked from the README.
+- The README, screenshots and GIFs reach the connected GitHub repository through the automatic two-way sync. Image links are relative paths, so they show up on GitHub.
