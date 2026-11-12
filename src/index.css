@@ -19,39 +19,39 @@
     --popover: 0 0% 100%;
     --popover-foreground: 280 28% 12%;
 
-    --primary: 14 92% 58%;
+    --primary: 14 88% 40%;
     --primary-foreground: 36 40% 98%;
-    --primary-glow: 22 96% 66%;
+    --primary-glow: 22 90% 44%;
 
     --secondary: 282 38% 20%;
     --secondary-foreground: 36 40% 98%;
 
     --muted: 36 28% 93%;
-    --muted-foreground: 280 12% 40%;
+    --muted-foreground: 280 14% 36%;
 
     --accent: 38 94% 60%;
     --accent-foreground: 280 28% 12%;
 
-    --tertiary: 198 80% 56%;
+    --tertiary: 198 85% 32%;
     --tertiary-foreground: 36 40% 98%;
 
-    --success: 152 60% 40%;
+    --success: 152 65% 27%;
     --success-foreground: 36 40% 98%;
 
-    --destructive: 0 78% 55%;
+    --destructive: 0 72% 44%;
     --destructive-foreground: 36 40% 98%;
 
     --border: 30 22% 86%;
     --input: 30 22% 86%;
-    --ring: 14 92% 58%;
+    --ring: 14 88% 40%;
 
     --radius: 1.25rem;
 
     /* Gradients */
-    --gradient-sunset: linear-gradient(135deg, hsl(14 92% 58%), hsl(22 96% 66%) 50%, hsl(38 94% 60%));
-    --gradient-aurora: linear-gradient(135deg, hsl(282 60% 35%), hsl(14 92% 58%) 55%, hsl(38 94% 60%));
-    --gradient-ocean: linear-gradient(135deg, hsl(198 80% 56%), hsl(232 70% 60%) 60%, hsl(282 60% 50%));
-    --gradient-mint: linear-gradient(135deg, hsl(152 60% 50%), hsl(178 60% 50%));
+    --gradient-sunset: linear-gradient(135deg, hsl(14 88% 40%), hsl(22 90% 40%) 50%, hsl(30 92% 34%));
+    --gradient-aurora: linear-gradient(135deg, hsl(282 60% 30%), hsl(14 88% 40%) 55%, hsl(28 90% 34%));
+    --gradient-ocean: linear-gradient(135deg, hsl(198 85% 30%), hsl(232 60% 42%) 60%, hsl(282 55% 38%));
+    --gradient-mint: linear-gradient(135deg, hsl(152 65% 26%), hsl(178 65% 25%));
     --gradient-warm: linear-gradient(180deg, hsl(36 40% 97%), hsl(36 50% 94%));
     --gradient-mesh:
       radial-gradient(at 12% 8%, hsl(14 92% 70% / 0.35) 0px, transparent 50%),
@@ -74,12 +74,12 @@
 
     --sidebar-background: 36 42% 96%;
     --sidebar-foreground: 280 28% 12%;
-    --sidebar-primary: 14 92% 58%;
+    --sidebar-primary: 14 88% 40%;
     --sidebar-primary-foreground: 36 40% 98%;
     --sidebar-accent: 36 28% 92%;
     --sidebar-accent-foreground: 280 28% 12%;
     --sidebar-border: 30 22% 86%;
-    --sidebar-ring: 14 92% 58%;
+    --sidebar-ring: 14 88% 40%;
   }
 
   .dark {
@@ -278,4 +278,12 @@ html.reduce-motion *::after {
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
   scroll-behavior: auto !important;
+}
+
+/* WCAG 2.4.7 focus visible + 2.3.3 reduced motion */
+@layer base {
+  :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
