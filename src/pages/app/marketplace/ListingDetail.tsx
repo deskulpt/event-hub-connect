@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, BookmarkCheck, BookmarkPlus, MapPin, Sparkles, Wallet, Users } from "lucide-react";
+import { ArrowLeft, Globe, Phone, BookmarkCheck, BookmarkPlus, MapPin, Sparkles, Wallet, Users } from "lucide-react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageLayout } from "@/components/shell/PageLayout";
 import { EmptyState } from "@/components/shell/EmptyState";
@@ -22,6 +22,7 @@ import { SendInquiryDialog } from "@/components/crm/SendInquiryDialog";
 import { formatCents, scoreVendorFit, scoreVenueFit } from "@/lib/fitScore";
 import { FitRing } from "@/components/marketplace/FitRing";
 import { ListingCover } from "@/components/marketplace/ListingCover";
+import { ClaimListingDialog } from "@/components/marketplace/ClaimListingDialog";
 import { ReviewsSection } from "@/components/marketplace/ReviewsSection";
 
 const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
@@ -103,6 +104,8 @@ export default function ListingDetail() {
   const tags = kind === "venue" ? venue?.vibe_tags : vendor?.vibe_tags;
   const price = kind === "venue" ? venue?.base_price_cents : vendor?.base_price_cents;
   const photo = kind === "venue" ? venue?.photo_url : vendor?.photo_url;
+  const listing = kind === "venue" ? venue : vendor;
+  const unclaimed = listing?.claim_status === "unclaimed";
 
   return (
     <PageLayout>
@@ -149,7 +152,10 @@ export default function ListingDetail() {
                     {savedQ.data ? "Saved" : "Save"}
                   </Button>
                 )}
-                {ownerId && user && (
+                {unclaimed && id && name && (
+                  <ClaimListingDialog listingId={id} listingKind={kind === "venue" ? "venue" : "vendor"} name={name} />
+                )}
+                {ownerId && user && !unclaimed && (
                   <SendInquiryDialog
                     eventId={activeEvent?.id ?? null}
                     defaultSubject={name ? `Inquiry: ${name}` : ""}
@@ -167,6 +173,18 @@ export default function ListingDetail() {
                 <p className="leading-relaxed text-sm text-foreground/90">
                   {description || "No description yet."}
                 </p>
+                {(listing?.address || listing?.phone || listing?.website) && (
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    {listing?.address && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{listing.address}</span>}
+                    {listing?.phone && <a href={`tel:${listing.phone}`} className="flex items-center gap-1 hover:text-foreground"><Phone className="h-3 w-3" />{listing.phone}</a>}
+                    {listing?.website && <a href={listing.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-foreground"><Globe className="h-3 w-3" />Website</a>}
+                  </div>
+                )}
+                {unclaimed && (
+                  <p className="mt-3 rounded-md border border-border/60 bg-muted/40 p-2 text-xs text-muted-foreground">
+                    This business hasn't joined Vibely yet. Details come from public map data and the photo is illustrative. Own it? Claim it free.
+                  </p>
+                )}
                 {tags && tags.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {tags.map((t) => <Badge key={t} variant="outline" className="capitalize text-[10px]">{t}</Badge>)}

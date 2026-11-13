@@ -956,6 +956,51 @@ export type Database = {
           },
         ]
       }
+      listing_claims: {
+        Row: {
+          claimant_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          listing_kind: string
+          proof_note: string | null
+          role_at_business: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          claimant_id: string
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          listing_kind: string
+          proof_note?: string | null
+          role_at_business?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          claimant_id?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          listing_kind?: string
+          proof_note?: string | null
+          role_at_business?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       localities: {
         Row: {
           active: boolean
@@ -1849,10 +1894,12 @@ export type Database = {
       }
       vendors: {
         Row: {
+          address: string | null
           background_check_state: Database["public"]["Enums"]["verification_state"]
           base_price_cents: number | null
           category: Database["public"]["Enums"]["vendor_category"]
           city: string | null
+          claim_status: string
           created_at: string
           description: string | null
           id: string
@@ -1860,18 +1907,23 @@ export type Database = {
           locality_id: string | null
           name: string
           owner_id: string
+          phone: string | null
           photo_url: string | null
           published: boolean
           rate_card: Json
+          source: string | null
           updated_at: string
           verification_state: Database["public"]["Enums"]["verification_state"]
           vibe_tags: string[] | null
+          website: string | null
         }
         Insert: {
+          address?: string | null
           background_check_state?: Database["public"]["Enums"]["verification_state"]
           base_price_cents?: number | null
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
+          claim_status?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -1879,18 +1931,23 @@ export type Database = {
           locality_id?: string | null
           name: string
           owner_id: string
+          phone?: string | null
           photo_url?: string | null
           published?: boolean
           rate_card?: Json
+          source?: string | null
           updated_at?: string
           verification_state?: Database["public"]["Enums"]["verification_state"]
           vibe_tags?: string[] | null
+          website?: string | null
         }
         Update: {
+          address?: string | null
           background_check_state?: Database["public"]["Enums"]["verification_state"]
           base_price_cents?: number | null
           category?: Database["public"]["Enums"]["vendor_category"]
           city?: string | null
+          claim_status?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -1898,22 +1955,27 @@ export type Database = {
           locality_id?: string | null
           name?: string
           owner_id?: string
+          phone?: string | null
           photo_url?: string | null
           published?: boolean
           rate_card?: Json
+          source?: string | null
           updated_at?: string
           verification_state?: Database["public"]["Enums"]["verification_state"]
           vibe_tags?: string[] | null
+          website?: string | null
         }
         Relationships: []
       }
       venues: {
         Row: {
           accessibility_attributes: string[]
+          address: string | null
           base_price_cents: number | null
           capacity_max: number | null
           capacity_min: number | null
           city: string | null
+          claim_status: string
           created_at: string
           description: string | null
           id: string
@@ -1921,17 +1983,22 @@ export type Database = {
           name: string
           organization_id: string | null
           owner_id: string
+          phone: string | null
           photo_url: string | null
           published: boolean
+          source: string | null
           updated_at: string
           vibe_tags: string[] | null
+          website: string | null
         }
         Insert: {
           accessibility_attributes?: string[]
+          address?: string | null
           base_price_cents?: number | null
           capacity_max?: number | null
           capacity_min?: number | null
           city?: string | null
+          claim_status?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -1939,17 +2006,22 @@ export type Database = {
           name: string
           organization_id?: string | null
           owner_id: string
+          phone?: string | null
           photo_url?: string | null
           published?: boolean
+          source?: string | null
           updated_at?: string
           vibe_tags?: string[] | null
+          website?: string | null
         }
         Update: {
           accessibility_attributes?: string[]
+          address?: string | null
           base_price_cents?: number | null
           capacity_max?: number | null
           capacity_min?: number | null
           city?: string | null
+          claim_status?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -1957,10 +2029,13 @@ export type Database = {
           name?: string
           organization_id?: string | null
           owner_id?: string
+          phone?: string | null
           photo_url?: string | null
           published?: boolean
+          source?: string | null
           updated_at?: string
           vibe_tags?: string[] | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -2026,6 +2101,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_listing_claim: { Args: { _claim_id: string }; Returns: undefined }
       claim_self_service_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: undefined

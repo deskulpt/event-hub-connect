@@ -1,4 +1,4 @@
-import { Bell, Search, Sparkles, ChevronsUpDown, LogOut, User as UserIcon, Settings as SettingsIcon, Check, PartyPopper, Briefcase, Building2, Command } from "lucide-react";
+import { Bell, Search, Sparkles, ChevronsUpDown, LogOut, User as UserIcon, Settings as SettingsIcon, Check, PartyPopper, Briefcase, Building2, Command, Presentation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -18,6 +18,11 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useActiveRole } from "@/hooks/useActiveRole";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useDemoStore } from "@/stores/use-demo-store";
+import { clearDemoData, seedDemoData } from "@/services/demo";
 
 const roleMeta: Partial<Record<AppRole, { label: string; icon: typeof PartyPopper }>> = {
   host: { label: "Host", icon: PartyPopper },
@@ -37,7 +42,26 @@ const roleMeta: Partial<Record<AppRole, { label: string; icon: typeof PartyPoppe
 const metaFor = (role: AppRole) => roleMeta[role] ?? { label: "Member", icon: PartyPopper };
 
 export const TopBar = () => {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, user, canUseDemo, demoMode } = useAuth();
+  const setDemo = useDemoStore((st) => st.setEnabled);
+  const qc = useQueryClient();
+  const [demoBusy, setDemoBusy] = useState(false);
+
+  const toggleDemo = async (on: boolean) => {
+    if (!user) return;
+    setDemoBusy(true);
+    try {
+      if (on) await seedDemoData(user.id);
+      else await clearDemoData(user.id);
+      setDemo(on);
+      await qc.invalidateQueries();
+      toast.success(on ? "Demo mode on — every workspace and sample data unlocked" : "Demo mode off — sample data removed");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not switch demo mode");
+    } finally {
+      setDemoBusy(false);
+    }
+  };
   const { activeRole, roles, setActiveRole, hasMultipleRoles } = useActiveRole();
   const navigate = useNavigate();
   const [aiOpen, setAiOpen] = useState(false);
@@ -117,6 +141,16 @@ export const TopBar = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/app/settings")}><UserIcon className="mr-2 h-4 w-4" />Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/app/settings")}><SettingsIcon className="mr-2 h-4 w-4" />Settings</DropdownMenuItem>
+            {canUseDemo && (
+              <DropdownMenuItem
+                onSelect={(e) => { e.preventDefault(); if (!demoBusy) void toggleDemo(!demoMode); }}
+                disabled={demoBusy}
+              >
+                <Presentation className="mr-2 h-4 w-4" />
+                <span className="flex-1">{demoBusy ? "Switching…" : "Demo mode"}</span>
+                <Switch checked={demoMode} aria-label="Toggle demo mode" className="pointer-events-none" />
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut().then(() => navigate("/"))}><LogOut className="mr-2 h-4 w-4" />Sign out</DropdownMenuItem>
           </DropdownMenuContent>

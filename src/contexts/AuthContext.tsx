@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemoStore } from "@/stores/use-demo-store";
 
 export type AppRole =
   | "host"
@@ -18,6 +19,10 @@ export type AppRole =
 
 export const STAFF_ROLES: AppRole[] = ["admin", "ops_admin", "super_admin"];
 export const MODERATOR_ROLES: AppRole[] = [...STAFF_ROLES, "moderator"];
+export const ALL_ROLES: AppRole[] = ["host", "member", "volunteer_host", "pro", "professional", "business", "sponsor", "org_admin", "moderator", "admin", "ops_admin", "super_admin"];
+
+/** The only account allowed to turn on demo mode. */
+export const DEMO_OWNER_EMAIL = "anand2064@gmail.com";
 
 interface Profile {
   id: string;
@@ -33,6 +38,9 @@ interface AuthContextValue {
   session: Session | null;
   profile: Profile | null;
   roles: AppRole[];
+  /** True for the demo owner account when it is also staff. */
+  canUseDemo: boolean;
+  demoMode: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -86,8 +94,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) await loadProfile(user.id);
   };
 
+  const demoEnabled = useDemoStore((st) => st.enabled);
+  const canUseDemo =
+    (user?.email ?? "").toLowerCase() === DEMO_OWNER_EMAIL && roles.some((r) => STAFF_ROLES.includes(r));
+  const demoMode = canUseDemo && demoEnabled;
+  const effectiveRoles = demoMode ? ALL_ROLES : roles;
+
   return (
-    <AuthContext.Provider value={{ user, session, profile, roles, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider
+      value={{ user, session, profile, roles: effectiveRoles, canUseDemo, demoMode, loading, signOut, refreshProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );

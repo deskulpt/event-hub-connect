@@ -8,6 +8,7 @@ import { ModerationPanel } from "@/components/admin/ModerationPanel";
 import { VerificationQueuePanel } from "@/components/admin/VerificationQueuePanel";
 import { CommercePanel } from "@/components/admin/CommercePanel";
 import { OperationsPanel } from "@/components/admin/OperationsPanel";
+import { ClaimsPanel } from "@/components/admin/ClaimsPanel";
 
 export const Admin = () => (
   <PageLayout>
@@ -16,8 +17,9 @@ export const Admin = () => (
       title="Admin console"
       subtitle="Manage flags, AI settings, languages, safety and commerce for the whole community."
     />
-    <Tabs defaultValue="flags" className="mt-4">
+    <Tabs defaultValue="claims" className="mt-4">
       <TabsList className="flex w-full flex-wrap justify-start gap-1">
+        <TabsTrigger value="claims">Claims & outreach</TabsTrigger>
         <TabsTrigger value="flags">Flags</TabsTrigger>
         <TabsTrigger value="ai">AI</TabsTrigger>
         <TabsTrigger value="localization">Languages</TabsTrigger>
@@ -26,6 +28,7 @@ export const Admin = () => (
         <TabsTrigger value="commerce">Commerce</TabsTrigger>
         <TabsTrigger value="operations">Operations</TabsTrigger>
       </TabsList>
+      <TabsContent value="claims" className="mt-4"><ClaimsPanel /></TabsContent>
       <TabsContent value="flags" className="mt-4"><FeatureFlagsPanel /></TabsContent>
       <TabsContent value="ai" className="mt-4"><AiSettingsPanel /></TabsContent>
       <TabsContent value="localization" className="mt-4"><LocalizationPanel /></TabsContent>

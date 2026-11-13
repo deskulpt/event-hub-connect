@@ -8,6 +8,20 @@
       "when": 1794582203263,
       "tag": "0000_scope_reviews_flags_read",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794583326221,
+      "tag": "0001_listing_claims",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794583524995,
+      "tag": "0002_grant_owner_super_admin",
+      "breakpoints": true
     }
   ]
 }
