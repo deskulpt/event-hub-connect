@@ -1,0 +1,3 @@
+- Imported third-party listings are owned by the platform admin with `claim_status='unclaimed'`; ownership transfers only via the staff-only `approve_listing_claim` function. Why: keeps claims auditable and prevents self-takeover.
+- Platform booking commission is computed only in `src/lib/platform-fee.ts`. Why: one source of truth for fee math.
+- Demo mode is a client-only UI switch gated to one owner email plus a staff role; sample rows are tagged (`events.external_source='demo'`, `contacts.notes='[demo]'`) so they can be removed. Why: real permissions stay enforced server-side.
