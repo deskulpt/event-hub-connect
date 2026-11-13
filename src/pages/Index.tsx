@@ -52,7 +52,7 @@ const Index = () => {
             height={1088}
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/70 md:via-background/85 md:to-background/20" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
 
           <div className="container relative px-4 pb-20 pt-16 sm:pt-24 lg:pb-32 lg:pt-32">
