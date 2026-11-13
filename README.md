@@ -1,8 +1,8 @@
 # Vibely / Evntr
 
-A Vite + React + TypeScript frontend for a multilingual, accessibility-first community engagement platform for adults 50+.
+A Vite + React + TypeScript frontend for a multilingual, accessibility-first community engagement platform for everyone + <img width="890" height="775" alt="Screenshot 2026-11-13 at 10 20 06 AM" src="https://github.com/user-attachments/assets/30682182-e39d-4b3e-9cf7-bd8054f058e5" />
+adults 50+.
 
-![Vibely event illustration](src/assets/hero-event.jpg)
 
 This app helps members discover local activities, vote on community proposals, join circles, explore nearby businesses and perks, and manage events, organizations, and trust workflows through a modern web experience backed by Supabase.
 
@@ -19,6 +19,10 @@ Vibely is designed around a community-first model:
 - Support multilingual and accessibility-focused experiences for older adults
 
 The project is aligned with the product direction described in `PRD.md` and the repository instructions in `AGENTS.md`.
+
+<img width="890" height="775" alt="Screenshot 2026-11-13 at 10 14 26 AM" src="https://github.com/user-attachments/assets/bf4a514d-6fc7-4289-802e-b4bcb08f348f" />
+
+
 
 ## Tech stack
 
