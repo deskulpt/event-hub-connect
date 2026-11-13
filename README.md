@@ -2,6 +2,8 @@
 
 A Vite + React + TypeScript frontend for a multilingual, accessibility-first community engagement platform for adults 50+.
 
+![Vibely event illustration](src/assets/hero-event.jpg)
+
 This app helps members discover local activities, vote on community proposals, join circles, explore nearby businesses and perks, and manage events, organizations, and trust workflows through a modern web experience backed by Supabase.
 
 ## Product overview
