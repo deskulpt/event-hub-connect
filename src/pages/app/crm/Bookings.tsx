@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { NewBookingDialog } from "@/components/crm/NewBookingDialog";
 import { listBookingsAsHost, listBookingsAsProvider, updateBookingStatus } from "@/services/bookings";
+import { splitBookingTotal } from "@/lib/platform-fee";
 import type { BookingRecord, BookingStatus } from "@/types/booking";
 
 const statusVariant: Record<BookingStatus, "default" | "secondary" | "outline"> = {
@@ -23,6 +24,8 @@ const statusVariant: Record<BookingStatus, "default" | "secondary" | "outline"> 
 const Row = ({ b, side, onUpdate }: { b: BookingRecord; side: "host" | "provider"; onUpdate: (id: string, s: BookingStatus) => void }) => {
   const dep = b.deposit_cents ? `$${(b.deposit_cents / 100).toLocaleString()}` : "—";
   const tot = b.total_cents ? `$${(b.total_cents / 100).toLocaleString()}` : "—";
+  const split = splitBookingTotal(b.total_cents ?? 0);
+  const money = (c: number) => `$${(c / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
   return (
     <div className="flex flex-col gap-2 rounded-md border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="space-y-1">
@@ -35,6 +38,11 @@ const Row = ({ b, side, onUpdate }: { b: BookingRecord; side: "host" | "provider
           {b.event_date && <span>{format(parseISO(b.event_date), "MMM d, yyyy")}</span>}
           <span>Deposit {dep}</span>
           <span>Total {tot}</span>
+          {b.total_cents > 0 && (
+            side === "provider"
+              ? <span>You receive {money(split.payoutCents)} (after 10% platform fee)</span>
+              : <span>Includes {money(split.feeCents)} platform fee</span>
+          )}
         </div>
       </div>
       <div className="flex gap-2">

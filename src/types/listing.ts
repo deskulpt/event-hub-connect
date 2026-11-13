@@ -27,6 +27,10 @@ export interface VenueRecord {
   description: string | null;
   photo_url: string | null;
   published: boolean;
+  claim_status?: string;
+  website?: string | null;
+  phone?: string | null;
+  address?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +46,10 @@ export interface VendorRecord {
   description: string | null;
   photo_url: string | null;
   published: boolean;
+  claim_status?: string;
+  website?: string | null;
+  phone?: string | null;
+  address?: string | null;
   created_at: string;
   updated_at: string;
 }
