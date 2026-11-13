@@ -87,7 +87,7 @@ export const HeroBriefSheet = () => {
                 key={c.id}
                 type="button"
                 onClick={() => handleStart(c.id)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-medium text-primary-foreground backdrop-blur-md transition-all hover:bg-white/20"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur-md transition-all hover:bg-card"
               >
                 <Icon className="h-3.5 w-3.5" />
                 {c.label}

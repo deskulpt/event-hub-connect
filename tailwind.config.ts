@@ -22,6 +22,8 @@ export default {
           foreground: "hsl(var(--primary-foreground))",
           glow: "hsl(var(--primary-glow))",
         },
+        scrim: "hsl(var(--scrim))",
+        "on-scrim": "hsl(var(--on-scrim))",
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",

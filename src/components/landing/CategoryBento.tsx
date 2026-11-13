@@ -1,45 +1,57 @@
 import { Link } from "react-router-dom";
 import { Building2, ChefHat, Music, Camera, Disc3, ClipboardList, ArrowUpRight } from "lucide-react";
+import venuesImg from "@/assets/tile-venues.jpg";
+import chefsImg from "@/assets/tile-chefs.jpg";
+import artistsImg from "@/assets/tile-artists.jpg";
+import photographersImg from "@/assets/tile-photographers.jpg";
+import djsImg from "@/assets/tile-djs.jpg";
+import plannersImg from "@/assets/tile-planners.jpg";
 
 const TILES = [
-  { title: "Venues", desc: "Cafes, lofts, gardens, ballrooms.", icon: Building2, gradient: "bg-gradient-aurora", to: "/auth?mode=signup&next=/app/marketplace/venues", span: "md:col-span-2 md:row-span-2" },
-  { title: "Chefs", desc: "Private dinners & catering.", icon: ChefHat, gradient: "bg-gradient-sunset", to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
-  { title: "Artists", desc: "Live music, painters, performers.", icon: Music, gradient: "bg-gradient-ocean", to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
-  { title: "Photographers", desc: "Capture every moment.", icon: Camera, gradient: "bg-gradient-mint", to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
-  { title: "DJs", desc: "Set the mood, all night.", icon: Disc3, gradient: "bg-gradient-aurora", to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
-  { title: "Planners", desc: "End-to-end orchestration.", icon: ClipboardList, gradient: "bg-gradient-sunset", to: "/auth?mode=signup&next=/app/marketplace/pros", span: "md:col-span-2" },
+  { title: "Venues", desc: "Cafes, lofts, gardens, ballrooms.", icon: Building2, img: venuesImg, to: "/auth?mode=signup&next=/app/marketplace/venues", span: "col-span-2 row-span-2" },
+  { title: "Chefs", desc: "Private dinners & catering.", icon: ChefHat, img: chefsImg, to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
+  { title: "Artists", desc: "Live music, painters, performers.", icon: Music, img: artistsImg, to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
+  { title: "Photographers", desc: "Capture every moment.", icon: Camera, img: photographersImg, to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
+  { title: "DJs", desc: "Set the mood, all night.", icon: Disc3, img: djsImg, to: "/auth?mode=signup&next=/app/marketplace/pros", span: "" },
+  { title: "Planners", desc: "End-to-end orchestration.", icon: ClipboardList, img: plannersImg, to: "/auth?mode=signup&next=/app/marketplace/pros", span: "col-span-2" },
 ];
 
 export const CategoryBento = () => (
   <section className="container px-4 py-16 sm:py-20">
-    <div className="mb-8 flex items-end justify-between gap-4">
-      <div className="max-w-xl">
-        <p className="text-sm font-semibold uppercase tracking-wider text-primary">Marketplace</p>
-        <h2 className="mt-2 font-display text-3xl font-semibold leading-tight text-secondary sm:text-4xl">
-          Whatever you're hosting.
-        </h2>
-      </div>
+    <div className="mb-8 max-w-xl">
+      <p className="text-sm font-semibold uppercase tracking-wider text-primary">Marketplace</p>
+      <h2 className="mt-2 font-display text-3xl font-semibold leading-tight text-secondary sm:text-4xl">
+        Whatever you're hosting.
+      </h2>
     </div>
 
-    <div className="grid auto-rows-[160px] grid-cols-2 gap-4 md:grid-cols-4">
+    <div className="grid auto-rows-[180px] grid-cols-2 gap-4 md:grid-cols-4">
       {TILES.map((t) => {
         const Icon = t.icon;
         return (
           <Link
             key={t.title}
             to={t.to}
-            className={`bento group relative flex flex-col justify-between p-5 ${t.span}`}
+            className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl p-5 shadow-soft ${t.span}`}
           >
-            <div className={`orb -right-12 -top-12 h-44 w-44 ${t.gradient}`} />
-            <div className={`relative flex h-11 w-11 items-center justify-center rounded-2xl ${t.gradient} shadow-soft`}>
-              <Icon className="h-5 w-5 text-primary-foreground" strokeWidth={2.2} />
+            <img
+              src={t.img}
+              alt={`${t.title} for events`}
+              loading="lazy"
+              width={1024}
+              height={1024}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-scrim/90 via-scrim/40 to-scrim/10" />
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-on-scrim/30 bg-on-scrim/15 backdrop-blur-md">
+              <Icon className="h-5 w-5 text-on-scrim" strokeWidth={2.2} />
             </div>
             <div className="relative">
               <div className="flex items-center justify-between">
-                <h3 className="font-display text-lg font-semibold text-secondary">{t.title}</h3>
-                <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+                <h3 className="font-display text-lg font-semibold text-on-scrim sm:text-xl">{t.title}</h3>
+                <ArrowUpRight className="h-4 w-4 text-on-scrim transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{t.desc}</p>
+              <p className="mt-1 text-xs text-on-scrim/85 sm:text-sm">{t.desc}</p>
             </div>
           </Link>
         );

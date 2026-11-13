@@ -9,6 +9,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { CategoryBento } from "@/components/landing/CategoryBento";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { FinalCta } from "@/components/landing/FinalCta";
+import heroImg from "@/assets/hero-gathering.jpg";
 
 const Index = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -43,11 +44,16 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative overflow-hidden bg-mesh">
-          {/* Animated orbs */}
-          <div className="orb left-[-10%] top-[-10%] h-[480px] w-[480px] bg-gradient-sunset opacity-40" />
-          <div className="orb right-[-15%] top-[10%] h-[420px] w-[420px] bg-gradient-aurora opacity-30" />
-          <div className="orb bottom-[-20%] left-[30%] h-[420px] w-[420px] bg-gradient-ocean opacity-25" />
+        <section className="relative overflow-hidden bg-background">
+          <img
+            src={heroImg}
+            alt="Friends of all ages sharing a garden dinner at sunset"
+            width={1920}
+            height={1088}
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/70 md:via-background/85 md:to-background/20" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
 
           <div className="container relative px-4 pb-20 pt-16 sm:pt-24 lg:pb-32 lg:pt-32">
             <div className="max-w-3xl">

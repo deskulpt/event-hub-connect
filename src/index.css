@@ -10,6 +10,8 @@
 
 @layer base {
   :root {
+    --scrim: 280 30% 8%;
+    --on-scrim: 36 40% 98%;
     --background: 36 40% 97%;
     --foreground: 280 28% 12%;
 
